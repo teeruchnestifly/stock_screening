@@ -1,11 +1,13 @@
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.*;
 import java.util.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-public class Volatility {
+public class Volatility{
 
     /**
      * A list containing all trading days in the 5 years.
@@ -15,17 +17,17 @@ public class Volatility {
     /**
      * A hashmap mapping each stock to an arrayList of their closing prices for each day in the 5 years.
      */
-    private final HashMap<String, ArrayList<Double>> stockClosingPrices = new HashMap<>();
+    private final HashMap<String, ArrayList<BigDecimal>> stockClosingPrices = new HashMap<>();
 
     /**
      * A hashmap mapping each stock to an arrayList of the 75% LTV of each closing price for each day in the 5 years.
      */
-    private final HashMap<String, ArrayList<Double>> stock75LTV = new HashMap<>();
+    private final HashMap<String, ArrayList<BigDecimal>> stock75LTV = new HashMap<>();
 
     /**
      * A hashmap mapping each stock to an arrayList of the 100% LTV of each closing price for each day in the 5 years.
      */
-    private final HashMap<String, ArrayList<Double>> stock100LTV = new HashMap<>();
+    private final HashMap<String, ArrayList<BigDecimal>> stock100LTV = new HashMap<>();
 
     /**
      * An arraylist containing the number of trading days needed for the set simulation length for each date.
@@ -67,6 +69,31 @@ public class Volatility {
      * of its LTV over the course of the 5 years.
      */
     private HashMap<String, Double> weightedAverage = new HashMap<>();
+    /**
+     * Constant for when the Excel spreadsheet has NA for the closing price.
+     */
+    private static final Integer noData = 99999;
+    /**
+     * Constant for when the Excel spreadsheet has NA for the closing price but in a double format.
+     */
+    private static final double noDataDouble = 99999.99;
+    /**
+     * Constant for the number of periods of months in the 5-year simulation.
+     */
+    private static final Integer numberOfPeriods = 20;
+    /**
+     * Constant used in the EWMA calculation.
+     */
+    private static final double lambda = 0.94;
+    /**
+     * Constant used to determine the failing condition of the first check.
+     */
+    private static final double checkOneFailCondition = 0.25;
+    /**
+     * Constant used to determine the failing condition of the second check.
+     */
+    private static final Integer checkTwoFailCondition = 5;
+
 
 
     /**
@@ -82,7 +109,7 @@ public class Volatility {
         String excelFilePath = "Data File.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(0);
+        Sheet sheet = workbook.getSheetAt(1);
         int numColumns = sheet.getRow(0).getLastCellNum();
 
         // Loops through every column from 1 onwards, and then loops through every row in each column to populate the
@@ -96,16 +123,16 @@ public class Volatility {
             } catch (IllegalStateException e1) {
                 stock = "TRUE";
             }
-            ArrayList<Double> closingPrices = new ArrayList<>();
+            ArrayList<BigDecimal> closingPrices = new ArrayList<>();
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-                double value;
+                BigDecimal value;
                 // Try catch clause needed because N/A is read as a string and therefore getNumericCellValue causes an
                 // error, N/A is stored as the int 99999 instead
                 try {
-                    value = sheet.getRow(r).getCell(c).getNumericCellValue();
+                    value = BigDecimal.valueOf(sheet.getRow(r).getCell(c).getNumericCellValue());
                     closingPrices.add(value);
                 } catch (Exception e2) {
-                    value = 99999;
+                    value = BigDecimal.valueOf(noData);
                     closingPrices.add(value);
                 }
             }
@@ -132,30 +159,32 @@ public class Volatility {
         // Will first calculate the index of the date corresponding to the number of months in the simulation length
         // before the reporting date
         Date reportDate = dates.get(dates.size() - 1);  // Report date is the most recent date in the list
-        Integer reportIndexSubmonths = helperDate(simulationLength, reportDate);
+        Integer reportIndexSubmonths = helperDate(simulationLength, reportDate) - 1;
         // Loops through every date up until reportIndexSubMonths which is the index of the date
-        for (int i = 0; i <= reportIndexSubmonths; i++) {
-            Date date = dates.get(i);
-            LocalDate LD = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
-            LocalDate futureLD = LD.plusMonths(simulationLength);
-            if (futureLD.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                futureLD = futureLD.minusDays(1);
+        do {
+            rowCount.clear();
+            reportIndexSubmonths += 1;
+            for (int i = 0; i <= reportIndexSubmonths; i++) {
+                Date date = dates.get(i);
+                LocalDate LD = LocalDate.ofInstant(date.toInstant(), ZoneId.systemDefault());
+                LocalDate futureLD = LD.plusMonths(simulationLength);
+                if (futureLD.getDayOfWeek() == DayOfWeek.SATURDAY) {
+                    futureLD = futureLD.minusDays(1);
+                }
+                if (futureLD.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                    futureLD = futureLD.minusDays(2);
+                }
+                Date futureDate = Date.from(futureLD.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                while (!dates.contains(futureDate)) {
+                    futureLD = futureLD.minusDays(1);
+                    futureDate = Date.from(futureLD.atStartOfDay(ZoneId.systemDefault()).toInstant());
+                }
+                rowCount.add(dates.indexOf(futureDate) - dates.indexOf(date));
             }
-            if (futureLD.getDayOfWeek() == DayOfWeek.SUNDAY) {
-                futureLD = futureLD.minusDays(2);
+            for (int i = reportIndexSubmonths; i < dates.size() - 1; i++) {
+                rowCount.add(rowCount.get(i) - 1);
             }
-            Date futureDate = Date.from(futureLD.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            while (!dates.contains(futureDate)) {
-                futureLD = futureLD.minusDays(1);
-                futureDate = Date.from(futureLD.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            }
-            rowCount.add(dates.indexOf(futureDate) - dates.indexOf(date));
-        }
-
-        int finalMonths = rowCount.get(reportIndexSubmonths - 1);
-        for (int k = 0; k <= finalMonths; k++) {
-            rowCount.add(finalMonths - k);
-        }
+        } while (rowCount.get(rowCount.size() - 1) == -1);
     }
 
 
@@ -195,8 +224,8 @@ public class Volatility {
      */
     public void LTVVal(Double LTV) {
         for (String stock : stockClosingPrices.keySet()) {
-            ArrayList<Double> result75 = calcLTV(stock, 0.75, LTV);
-            ArrayList<Double> result100 = calcLTV(stock, 1.00, LTV);
+            ArrayList<BigDecimal> result75 = calcLTV(stock, 0.75, LTV);
+            ArrayList<BigDecimal> result100 = calcLTV(stock, 1.00, LTV);
             stock75LTV.put(stock, result75);
             stock100LTV.put(stock, result100);
         }
@@ -205,25 +234,26 @@ public class Volatility {
     /**
      * A helper function that will loop through a given list of closing prices and calculate a given LTV percentage.
      *
-     * @param LTV the specified LTV value for the simulation
-     * @param stock the current stock in the iteration
+     * @param LTV     the specified LTV value for the simulation
+     * @param stock   the current stock in the iteration
      * @param percent the specified percentage level e.g. 75 or 100
-     *
      * @return LTVvals an arraylist storing either 75% or 100% of the LTV value for each closing price of the given
      * stock.
      */
-    public ArrayList<Double> calcLTV(String stock, double percent, double LTV) {
-        ArrayList<Double> LTVvals = new ArrayList<>();
-        for (Double closePrice : stockClosingPrices.get(stock)) {
-//            if (closePrice == 99999 || closePrice == 0) {
+    public ArrayList<BigDecimal> calcLTV(String stock, double percent, double LTV) {
+        ArrayList<BigDecimal> LTVvals = new ArrayList<>();
+        for (BigDecimal closePrice : stockClosingPrices.get(stock)) {
             //Check to see if the price is equal to 99999 which represents null or no data
-            if (closePrice == 99999) {
-                LTVvals.add(99999.99);
+            if (Objects.equals(closePrice, BigDecimal.valueOf(noData))) {
+                LTVvals.add(BigDecimal.valueOf(noDataDouble));
             } else {
                 // Add try catch error here + elsewhere in code
-                double notRounded = (closePrice * LTV) / percent;
-                double rounded = Math.round(notRounded * 100.0) / 100.0;
-                LTVvals.add(rounded);
+//                double notRounded = (closePrice * LTV) / percent;
+//                double rounded = Math.round(notRounded * 100.0) / 100.0;
+//                LTVvals.add(rounded);
+                BigDecimal bdec = closePrice;
+                bdec = bdec.multiply(new BigDecimal(LTV));
+                LTVvals.add(bdec.divide(new BigDecimal(percent), MathContext.DECIMAL32));
             }
         }
         return LTVvals;
@@ -250,7 +280,7 @@ public class Volatility {
             for (int i = 0; i < first75Day.size(); i++) {
                 // A check to put in 99999 representing null in the case that the stock never reaches 100% of its LTV
                 if (first100Day.get(i) == null) {
-                    numDays.add(99999);
+                    numDays.add(noData);
                 } else {
                     numDays.add(dates.indexOf(first100Day.get(i)) - dates.indexOf(first75Day.get(i)));
                 }
@@ -271,17 +301,17 @@ public class Volatility {
      * @return countList an arraylist storing the number of times the closing price reaches either 75% or 100% of its
      * value during the simulation length.
      */
-    public ArrayList<Integer> calcCount(String stock, ArrayList<Double> percentLTV, ArrayList<Date> firstDay) {
-        ArrayList<Double> closePrices = stockClosingPrices.get(stock);
+    public ArrayList<Integer> calcCount(String stock, ArrayList<BigDecimal> percentLTV, ArrayList<Date> firstDay) {
+        ArrayList<BigDecimal> closePrices = stockClosingPrices.get(stock);
         ArrayList<Integer> countList = new ArrayList<>();
         for (int i = 0; i < closePrices.size(); i++) {
             int count = 0;
             firstDay.add(null);
             for (int k = i; k < i + rowCount.get(i); k++) {
-//                if ((closePrices.get(k) != 99999 && closePrices.get(k) != 0) && (percentLTV.get(i) != 99999.99)) {
                 // A check to avoid including days which do not have any data into the count
-                if ((closePrices.get(k) != 99999) && (percentLTV.get(i) != 99999.99)) {
-                    if (closePrices.get(k) <= percentLTV.get(i)) {
+                if ((!Objects.equals(closePrices.get(k), BigDecimal.valueOf(noData))) &&
+                        (!Objects.equals(percentLTV.get(i), BigDecimal.valueOf(noDataDouble)))) {
+                    if (closePrices.get(k).compareTo(percentLTV.get(i)) <= 0) {
                         // A check to determine the date which is the first time the closing price reaches 75% or 100%
                         // of its value
                         if (count == 0) {
@@ -327,10 +357,10 @@ public class Volatility {
      */
     public ArrayList<Double> calcProb(ArrayList<Integer> count, String stock) {
         ArrayList<Double> probList = new ArrayList<>();
-        for (int i = 0; i < count.size() - 1; i++) {
+        for (int i = 0; i < count.size(); i++) {
             // A check to deal with days that have no data
-            if (stockClosingPrices.get(stock).get(i) == 99999){
-                probList.add(99999.99);
+            if (Objects.equals(stockClosingPrices.get(stock).get(i), BigDecimal.valueOf(noData))){
+                probList.add(noDataDouble);
             } else {
                 probList.add(count.get(i) / (double) rowCount.get(i));
             }
@@ -351,34 +381,38 @@ public class Volatility {
         ArrayList<Double> EWMA = new ArrayList<>();
         EWMACalc(EWMA);
         Collections.reverse(EWMA);
-
         for (String stock : stockClosingPrices.keySet()) {
             ArrayList<Double> result = calcAverages(stock);
-            Double sum = 0.0;
+            double sum = 0.0;
             for (int i = 0; i < result.size(); i++){
                 if (result.get(i) != null){
                     sum += EWMA.get(i) * result.get(i);
                 }
             }
-            Double sumEWMA = 0.0;
+            double sumEWMA = 0.0;
             for (int j = 0; j < result.size(); j++){
                 if (result.get(j) != null){
                     sumEWMA += EWMA.get(j);
                 }
             }
-            if (sum / sumEWMA > 0.25){
+            if (Double.isNaN(sum / sumEWMA) || sum / sumEWMA > checkOneFailCondition ){
                 failed.add(stock);
             }
             weightedAverage.put(stock, sum/sumEWMA);
         }
-//        System.out.println(weightedAverage);
         return failed;
     }
 
-    private static void EWMACalc(ArrayList<Double> EWMA) { //make all numbers constants
-        EWMA.add((0.06)/(1-(Math.pow(0.94, 20))));
-        for (int i = 1; i < 20; i++){
-            EWMA.add(EWMA.get(i-1)*0.94);
+
+    /**
+     * A function that performs the EWMA calculation and adds the results to an arraylist to be used in calculating
+     * the weighted average of probabilities.
+     *
+     */
+    private static void EWMACalc(ArrayList<Double> EWMA) {
+        EWMA.add((1-lambda)/(1-(Math.pow(lambda, numberOfPeriods))));
+        for (int i = 1; i < numberOfPeriods; i++){
+            EWMA.add(EWMA.get(i-1)*lambda);
         }
     }
 
@@ -421,18 +455,35 @@ public class Volatility {
         }
         indexOfMonthPeriods.add(0);
         Collections.reverse(indexOfMonthPeriods);
-
         // Will loop through each 3-month period and calculate the average of the probabilities
-        for (int j = 1; j < indexOfMonthPeriods.size(); j++) {
+        int count1 = 0;
+        int numDays1 = 0;
+        int noDataCount1 = 0;
+        for ( int i = indexOfMonthPeriods.get(0); i <= indexOfMonthPeriods.get(1); i++){
+            // A check to see if there is no data for the current day
+            if ((prob75.get(stock).get(i) == noDataDouble)) {
+                noDataCount1++;
+            }
+            if ((prob75.get(stock).get(i) != noDataDouble) && (prob75.get(stock).get(i) > 0)) {
+                count1++;
+            }
+            numDays1++;
+        }
+        if (noDataCount1 == numDays1) {
+            result.add(null);
+        } else {
+            result.add((count1 / (double) numDays1));
+        }
+        for (int j = 2; j < indexOfMonthPeriods.size(); j++) {
             int count = 0;
             int numDays = 0;
             int noDataCount = 0;
             for (int i = indexOfMonthPeriods.get(j - 1) + 1; i <= indexOfMonthPeriods.get(j); i++) {
                 // A check to see if there is no data for the current day
-                if ((prob75.get(stock).get(i) == 99999.99)) {
+                if ((prob75.get(stock).get(i) == noDataDouble)) {
                     noDataCount++;
                 }
-                if ((prob75.get(stock).get(i) != 99999.99) && (prob75.get(stock).get(i) > 0)) {
+                if ((prob75.get(stock).get(i) != noDataDouble) && (prob75.get(stock).get(i) > 0)) {
                     count++;
                 }
                 numDays++;
@@ -442,9 +493,7 @@ public class Volatility {
             if (noDataCount == numDays) {
                 result.add(null);
             } else {
-//                System.out.println(count);
-//                System.out.println(numDays);
-                result.add((count / (double) numDays));
+                result.add((count / (double) (numDays - noDataCount)));
             }
         }
         return result;
@@ -486,30 +535,88 @@ public class Volatility {
      */
     public ArrayList<String> volCheckTwo() {
         ArrayList<String> failed = new ArrayList<>();
-        // Will first calculate the index of the date 3 years prior to the reporting date
-        Date reportDate = dates.get(dates.size() - 1);
-        LocalDate reportLD = LocalDate.ofInstant(reportDate.toInstant(), ZoneId.systemDefault());
-        LocalDate reportLDSubYears = reportLD.minusYears(3);
-        Date reportDateSubYears = Date.from(reportLDSubYears.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        int reportIndexSubYears = dates.indexOf(reportDateSubYears);
-        while (reportIndexSubYears == -1) {
-            reportLDSubYears = reportLDSubYears.minusDays(1);
-            reportDateSubYears = Date.from(reportLDSubYears.atStartOfDay(ZoneId.systemDefault()).toInstant());
-            reportIndexSubYears = dates.indexOf(reportDateSubYears);
-        }
         for (String stock : stockClosingPrices.keySet()) {
-            ArrayList<Integer> stockDifference = difference75to100.get(stock);
-            int minDifference = stockDifference.get(reportIndexSubYears);
-            for (int i = reportIndexSubYears + 1; i < dates.size(); i++) {
-                if (stockDifference.get(i) < minDifference) {
-                    minDifference = stockDifference.get(i);
+            ArrayList<Integer> result = calcMinValues(stock);
+            int minDays = 99999;
+            for (int i = 8; i < result.size(); i++) {
+                if(result.get(i) < minDays) {
+                    minDays = result.get(i);
                 }
             }
-            if (minDifference < 5) {
+            if (minDays < checkTwoFailCondition) {
                 failed.add(stock);
             }
         }
         return failed;
+    }
+
+
+    /**
+     * A function that will perform the second volatility check by looping through the number of days between the
+     * closing price reaching 75% and 100% and checking if that value is less than 5. If so then the stock fails.
+     *
+     * @return failed an arraylist of the stocks that failed the test
+     */
+    public ArrayList<Integer> calcMinValues(String stock) {
+        ArrayList<Integer> result = new ArrayList<>();
+        Date reportDate = dates.get(dates.size() - 1);
+        LocalDate reportLD = LocalDate.ofInstant(reportDate.toInstant(), ZoneId.systemDefault());
+        LocalDate reportLDSubMonths = reportLD.minusMonths(2);
+        Date reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        int reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        while (reportLDSubMonths.getMonth() != reportLD.getMonth().minus(2)) {
+            reportLDSubMonths = reportLDSubMonths.plusDays(1);
+        }
+        reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        while (reportIndexSubmonths == -1) {
+            reportLDSubMonths = reportLDSubMonths.plusDays(1);
+            reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        }
+        Date initialDate = dates.get(reportIndexSubmonths);
+        ArrayList<Integer> indexOfMonthPeriods = new ArrayList<>();
+        indexOfMonthPeriods.add(reportIndexSubmonths);
+        for (int i = 0; i < 19; i++) {
+            indexOfMonthPeriods.add(calcDatePeriods(initialDate));
+            initialDate = dates.get(calcDatePeriods(initialDate));
+        }
+        indexOfMonthPeriods.add(0);
+        Collections.reverse(indexOfMonthPeriods);
+        ArrayList<Integer> stockDifference = difference75to100.get(stock);
+        int count1 = 0;
+        int minVal1 = 999999;
+        for (int i = indexOfMonthPeriods.get(0); i <= indexOfMonthPeriods.get(1); i++) {
+            if (stockDifference.get(i) > 0 & !(Objects.equals(stockDifference.get(i), noData))) {
+                count1++;
+            }
+            if (stockDifference.get(i) < minVal1) {
+                minVal1 = stockDifference.get(i);
+            }
+        }
+        if (count1 > 0) {
+            result.add(minVal1);
+        } else {
+            result.add(noData);
+        }
+        for (int j = 2; j < indexOfMonthPeriods.size(); j++) {
+            int count = 0;
+            int minVal = 999999;
+            for (int i = indexOfMonthPeriods.get(j - 1) + 1; i <= indexOfMonthPeriods.get(j); i++) {
+                if (stockDifference.get(i) > 0 & !(Objects.equals(stockDifference.get(i), noData))) {
+                    count++;
+                }
+                if (stockDifference.get(i) < minVal) {
+                    minVal = stockDifference.get(i);
+                }
+            }
+            if (count > 0) {
+                result.add(minVal);
+            } else {
+                result.add(noData);
+            }
+        }
+        return result;
     }
 
 
