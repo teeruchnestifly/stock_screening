@@ -94,6 +94,7 @@ public class Liquidity {
         }
     }
 
+
     /**
      * A helper function which is used to add additional values to a given hashmap while the Excel file is read through.
      *
@@ -115,6 +116,7 @@ public class Liquidity {
             stockData.put(stock, tempList);
         }
     }
+
 
     /**
      * A function that will calculate and store the averaged total values of a given stock. In order to do this,

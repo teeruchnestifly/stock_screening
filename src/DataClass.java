@@ -16,7 +16,7 @@ public class DataClass {
         vol.numDaysForward(simulatedTenor);
 
 
-//        Call for LTV60 Simulation
+//      Call for LTV60 Simulation
         vol.LTVVal(0.6);
         vol.count();
         vol.probability();
@@ -28,7 +28,7 @@ public class DataClass {
         System.out.println(SET60.size());
 
 
-//        Call for LTV50 Simulation
+//      Call for LTV50 Simulation
         vol.LTVVal(0.5);
         vol.count();
         vol.probability();
@@ -55,14 +55,12 @@ public class DataClass {
         System.out.println("Stocks classed as SET40: " + SET40);
         System.out.println(SET40.size());
 
-//         Displays failed stocks
+//      Displays failed stocks
         System.out.println("Stocks that failed all tests: " + vol.volatilityFailed());
         System.out.println(vol.volatilityFailed().size());
-//
+
         PF_REIT_IFF pf = new PF_REIT_IFF();
-//        System.out.println(pf.lessOneYearCollection());
-//        System.out.println(pf.PF_REITCollection());
-//        System.out.println(pf.IFFCollection());
+
 
 
         ArrayList<String> MAX60 = new ArrayList<>();
@@ -100,7 +98,7 @@ public class DataClass {
         System.out.println();
         System.out.println("Removal of stocks which are PF&REIT / IFF / <1y");
         System.out.println();
-//
+
         System.out.println("Stocks classed as MAX60: " + MAX60);
         System.out.println(MAX60.size());
         System.out.println("Stocks classed as MAX50: " + MAX50);
@@ -119,6 +117,5 @@ public class DataClass {
         System.out.println("Stocks that passed liquidity test: " + liq.liqPassed(stockFSPortion));
         System.out.println("Stocks that failed liquidity test: " + liq.liqFailed(stockFSPortion));
 
-//        System.out.println(liq.liqCheckOne(stockFSPortion));
     }
 }
