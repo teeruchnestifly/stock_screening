@@ -11,8 +11,8 @@ public class Fundamental {
 
 
     /**
-     * A function that will perform the first liquidity check by calculating the max collateral pledged for each stock
-     * and comparing that value to 10 million baht. If it is less than 10 million, the stock fails.
+     * A function that will perform the first fundamental check by looping through the net profit levels for each stock
+     * over the course of 5 years. If there are 4 consecutive years of losses, the stock fails.
      *
      * @return failed an arraylist of the stocks that failed the test
      */
@@ -36,8 +36,8 @@ public class Fundamental {
 
 
     /**
-     * A function that will perform the first liquidity check by calculating the max collateral pledged for each stock
-     * and comparing that value to 10 million baht. If it is less than 10 million, the stock fails.
+     * A function that will perform the second fundamental check by looping through the ICR levels for each stock
+     * over the course of 5 years. If there are 4 consecutive years when ICR is less than 1, the stock fails.
      *
      * @return failed an arraylist of the stocks that failed the test
      */

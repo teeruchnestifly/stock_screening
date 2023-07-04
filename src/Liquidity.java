@@ -29,6 +29,7 @@ public class Liquidity {
      * A hashmap mapping all stocks to a big decimal representing their max collateral pledged.
      */
     private final HashMap<String, BigDecimal> stockMaxCP = new HashMap<>();
+    private final HashMap<String, BigDecimal> stockMaxCPRatio = new HashMap<>();
     /**
      * A list containing all trading days in the last year.
      */
@@ -262,6 +263,7 @@ public class Liquidity {
             } else {
                 try {
                     BigDecimal result = (stockMaxCP.get(stock)).divide(marketCap, MathContext.DECIMAL32);
+                    stockMaxCPRatio.put(stock, result);
                     if (result.compareTo(BigDecimal.valueOf(0.005)) > 0) {
                         failed.add(stock);
                     }
@@ -287,6 +289,7 @@ public class Liquidity {
                 liquidityPassed.add(stock);
             }
         }
+        System.out.println("WORK:   " + stockMaxCP.get("WORK"));
         return liquidityPassed;
     }
 
