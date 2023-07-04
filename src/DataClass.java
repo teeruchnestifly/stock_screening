@@ -9,7 +9,6 @@ public class DataClass {
     public static Integer simulatedTenor = 9;
 
     public static void main(String[] args) throws IOException {
-//        ArrayList<String> PF_REIT_IFF = new ArrayList<>();
 
         Volatility vol = new Volatility();
         Liquidity liq = new Liquidity();

@@ -94,49 +94,69 @@ public class Liquidity {
         }
     }
 
-    public void helper(String stock, BigDecimal value, HashMap stockData){
+    /**
+     * A helper function which is used to add additional values to a given hashmap while the Excel file is read through.
+     *
+     * @param stock the current stock
+     * @param value the data being added to the hashmap
+     * @param stockData the hashmap being added to (either stockMarketCap or stockTotalValue)
+     *
+     */
+    public void helper(String stock, BigDecimal value, HashMap<String, ArrayList<BigDecimal>> stockData){
         try{
-            ArrayList<BigDecimal> temp = (ArrayList<BigDecimal>) stockData.get(stock);
-            temp.add(value);
-            stockData.put(stock, temp);
+            ArrayList<BigDecimal> tempList = stockData.get(stock);
+            tempList.add(value);
+            stockData.put(stock, tempList);
         } catch (NullPointerException e3) {
-            ArrayList<BigDecimal> closingPrice = new ArrayList<>();
-            stockData.put(stock, closingPrice);
-            ArrayList<BigDecimal> temp = (ArrayList<BigDecimal>) stockData.get(stock);
-            temp.add(value);
-            stockData.put(stock, temp);
+            ArrayList<BigDecimal> newList = new ArrayList<>();
+            stockData.put(stock, newList);
+            ArrayList<BigDecimal> tempList = stockData.get(stock);
+            tempList.add(value);
+            stockData.put(stock, tempList);
         }
     }
 
+    /**
+     * A function that will calculate and store the averaged total values of a given stock. In order to do this,
+     * the function must calculate one-month intervals. These 12 periods will store the averaged total values.
+     *
+     * Updates stockTotalValueAveraged which maps each stock to a list of their averaged total values.
+     */
     public void calcAverages() {
-        ArrayList<Integer> result = calcMonths();
+        ArrayList<Integer> monthIndexes = calcMonths();
         for (String stock : stockMarketCap.keySet()) {
+            //STILL NEED TO FIND SOLUTION TO THIS CASE
             if (stockTotalValue.get(stock).size() == 262) {
-                ArrayList<BigDecimal> result2 = new ArrayList<>();
+                ArrayList<BigDecimal> averagedValues = new ArrayList<>();
                 BigDecimal total1 = BigDecimal.valueOf(0);
                 int numDays1 = 0;
-                for (int i = result.get(0) + 1; i <= result.get(1); i++) {
+                for (int i = monthIndexes.get(0) + 1; i <= monthIndexes.get(1); i++) {
                     total1 = total1.add(stockTotalValue.get(stock).get(i));
                     numDays1++;
                 }
-                result2.add((total1.divide(BigDecimal.valueOf(numDays1), MathContext.DECIMAL32)));
-//                System.out.println(stock + result2);
-                for (int j = 2; j < result.size(); j++) {
+                averagedValues.add((total1.divide(BigDecimal.valueOf(numDays1), MathContext.DECIMAL32)));
+                for (int j = 2; j < monthIndexes.size(); j++) {
                     BigDecimal total = BigDecimal.valueOf(0);
                     int numDays = 0;
-                    for (int i = result.get(j - 1) + 1; i <= result.get(j); i++) {
+                    for (int i = monthIndexes.get(j - 1) + 1; i <= monthIndexes.get(j); i++) {
                         total = total.add(stockTotalValue.get(stock).get(i));
                         numDays++;
                     }
-                    result2.add((total.divide(BigDecimal.valueOf(numDays), MathContext.DECIMAL32)));
+                    averagedValues.add((total.divide(BigDecimal.valueOf(numDays), MathContext.DECIMAL32)));
                 }
-                stockTotalValueAveraged.put(stock, result2);
+                stockTotalValueAveraged.put(stock, averagedValues);
             } else {
                 stockTotalValueAveraged.put(stock, null);
             }
         }
     }
 
+
+    /**
+     * A helper function that will calculate a list of indexes corresponding to the end of each month.
+     *
+     * @return indexOfMonthPeriod an arraylist of the indexes of the end of each month.
+     */
     public ArrayList<Integer> calcMonths(){
         Date reportDate = dates.get(dates.size() - 1);
         ArrayList<Integer> indexOfMonthPeriods = new ArrayList<>();
@@ -151,6 +171,13 @@ public class Liquidity {
     }
 
 
+    /**
+     * A helper function that will calculate the index of a date 1 month prior to given date initialDate.
+     *
+     * @param initialDate the date for which 3 months will be subtracted from
+     *
+     * @return initialDateSubMonths an integer representing the index of the date 1 month prior to the initialDate
+     */
     public Integer calcDatePeriods(Date initialDate){
         LocalDate reportLD = LocalDate.ofInstant(initialDate.toInstant(), ZoneId.systemDefault());
         LocalDate reportLDSubMonths = reportLD;
@@ -168,6 +195,12 @@ public class Liquidity {
     }
 
 
+    /**
+     * A function that will perform the first liquidity check by calculating the max collateral pledged for each stock
+     * and comparing that value to 10 million baht. If it is less than 10 million, the stock fails.
+     *
+     * @return failed an arraylist of the stocks that failed the test
+     */
     public ArrayList<String> liqCheckOne(HashMap<String, Double> stockFSPortion) {
         ArrayList<String> failed = new ArrayList<>();
         for (String stock : stockMarketCap.keySet()) {
@@ -185,6 +218,14 @@ public class Liquidity {
         return failed;
     }
 
+    /**
+     * A function that will calculate a given stock's maximum collateral pledged and return it.
+     *
+     * @param stock the current stock
+     * @param stockFS the stock's FS portion
+     *
+     * @return maxCP, the stock's maximum collateral pledged.
+     */
     public BigDecimal maxCollateralPledged(String stock, BigDecimal stockFS){
         BigDecimal sum = BigDecimal.valueOf(0);
         BigDecimal maxCP;
@@ -202,6 +243,13 @@ public class Liquidity {
         return maxCP;
     }
 
+
+    /**
+     * A function that will perform the second liquidity check by calculating the ratio of max collateral pledged
+     * to market cap for each stock and comparing that value to 0.5%. If it is greater than 0.5%, the stock fails.
+     *
+     * @return failed an arraylist of the stocks that failed the test
+     */
     public ArrayList<String> liqCheckTwo() {
         ArrayList<String> failed = new ArrayList<>();
         for (String stock : stockMarketCap.keySet()) {
@@ -224,35 +272,35 @@ public class Liquidity {
     }
 
 
-
     /**
      * A function that will check to see which stocks passed the volatility test.
      *
-     * @return volatilityPassed an arraylist of the stocks that passed the test
+     * @return liquidityPassed an arraylist of the stocks that passed the test
      */
     public ArrayList<String> liqPassed(HashMap<String, Double> stockFSPortion){
-        ArrayList<String> liqPassed = new ArrayList<>();
+        ArrayList<String> liquidityPassed = new ArrayList<>();
         ArrayList<String> failed = liqFailed(stockFSPortion);
         for (String stock : stockMarketCap.keySet()) {
             if (!failed.contains(stock)){
-                liqPassed.add(stock);
+                liquidityPassed.add(stock);
             }
         }
-        return liqPassed;
+        return liquidityPassed;
     }
 
+
     /**
-     * A function that will check to see which stocks failed the volatility test.
+     * A function that will check to see which stocks failed the liquidity test.
      *
-     * @return volatilityFailed an arraylist of the stocks that failed the test
+     * @return liquidityFailed an arraylist of the stocks that failed the test
      */
     public ArrayList<String> liqFailed(HashMap<String, Double> stockFSPortion){
-        ArrayList<String> volatilityFailed = new ArrayList<>();
+        ArrayList<String> liquidityFailed = new ArrayList<>();
         for (String stock : stockMarketCap.keySet()) {
             if (liqCheckOne(stockFSPortion).contains(stock) || liqCheckTwo().contains(stock)){
-                volatilityFailed.add(stock);
+                liquidityFailed.add(stock);
             }
         }
-        return volatilityFailed;
+        return liquidityFailed;
     }
 }
