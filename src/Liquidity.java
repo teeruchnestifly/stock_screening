@@ -108,8 +108,8 @@ public class Liquidity {
             Collections.reverse(stockTotalValue.get(stock));
             Collections.reverse(stockMarketCap.get(stock));
         }
-        System.out.println(stockTotalValue.get("THANI"));
-        System.out.println(stockTotalValue.get("THANI"));
+//        System.out.println(stockTotalValue.get("THANI"));
+//        System.out.println(stockTotalValue.get("THANI"));
     }
 
 
@@ -182,7 +182,7 @@ public class Liquidity {
                 stockTotalValueAveraged.put(stock, averagedValues);
             }
         }
-        System.out.println(stockTotalValueAveraged.get("THANI"));
+//        System.out.println(stockTotalValueAveraged.get("THANI"));
     }
 
 
@@ -249,7 +249,7 @@ public class Liquidity {
                 failed.add(stock);
             }
         }
-        System.out.println("MAX CP" + stockMaxCP);
+//        System.out.println("MAX CP" + stockMaxCP);
         return failed;
     }
 

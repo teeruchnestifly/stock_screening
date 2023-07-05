@@ -10,14 +10,10 @@ public class DataClass {
 
     public static void main(String[] args) throws IOException {
 
-        Fundamental fundamental = new Fundamental();
-        fundamental.dataCollectionNetProfit();
-        fundamental.dataCollectionICR();
-        System.out.println(fundamental.fundamentalCheckOne());
-        System.out.println(fundamental.fundamentalCheckTwo());
 
         Volatility vol = new Volatility();
         Liquidity liq = new Liquidity();
+        Fundamental fundamental = new Fundamental();
         vol.dataCollection();
         vol.numDaysForward(simulatedTenor);
 
@@ -106,35 +102,61 @@ public class DataClass {
         System.out.println(MAX40Liq);
         System.out.println(MAX40Liq.size());
 
+
+        fundamental.dataCollectionNetProfit();
+        fundamental.dataCollectionICR();
+        ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
+        ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
+
+        System.out.println("Stocks that passed fundamental test: " + fundamentalPassed);
+        System.out.println("Stocks that failed fundamental test: " + fundamentalFailed);
+
+        ArrayList<String> MAX60fund = MAX60Liq;
+        for (int i = 0; i < fundamentalFailed.size(); i++){
+            MAX60fund.remove(fundamentalFailed.get(i));
+        }
+        ArrayList<String> MAX50fund = MAX50Liq;
+        for (int i = 0; i < fundamentalFailed.size(); i++){
+            MAX50fund.remove(fundamentalFailed.get(i));
+        }
+        ArrayList<String> MAX40fund = MAX40Liq;
+        for (int i = 0; i < fundamentalFailed.size(); i++){
+            MAX40fund.remove(fundamentalFailed.get(i));
+        }
+
+        System.out.println(MAX60fund);
+        System.out.println(MAX60fund.size());
+        System.out.println(MAX50fund);
+        System.out.println(MAX50fund.size());
+        System.out.println(MAX40fund);
+        System.out.println(MAX40fund.size());
+
         PF_REIT_IFF pf = new PF_REIT_IFF();
         ArrayList<String> MAX60 = new ArrayList<>();
         ArrayList<String> MAX50 = new ArrayList<>();
         ArrayList<String> MAX40 = new ArrayList<>();
         ArrayList<String> removedStocks = new ArrayList<>();
 
-        for (String stock : SET60) {
+        for (String stock : MAX60fund) {
             if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
                     !(pf.IFFCollection().contains(stock))) {
                 MAX60.add(stock);
-                stockFSPortion.put(stock, 0.375);
             } else {
                 removedStocks.add(stock);
             }
         }
-        for (String stock : SET50) {
+        for (String stock : MAX50fund) {
             if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
                     !(pf.IFFCollection().contains(stock))) {
                 MAX50.add(stock);
-                stockFSPortion.put(stock, 0.5);
             } else {
                 removedStocks.add(stock);
             }
         }
-        for (String stock : SET40) {
+        for (String stock : MAX40fund) {
             if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
                     !(pf.IFFCollection().contains(stock))) {
                 MAX40.add(stock);
-                stockFSPortion.put(stock, 0.5833);
             } else {
                 removedStocks.add(stock);
             }

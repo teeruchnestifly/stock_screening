@@ -42,7 +42,7 @@ public class Fundamental {
             }
             Collections.reverse(stockNetProfit.get(stock));
         }
-        System.out.println(stockNetProfit);
+//        System.out.println(stockNetProfit);
     }
 
     public void dataCollectionICR() throws IOException {
@@ -69,7 +69,7 @@ public class Fundamental {
             }
             Collections.reverse(stockICR.get(stock));
         }
-        System.out.println(stockICR);
+//        System.out.println(stockICR);
     }
 
 
@@ -141,5 +141,37 @@ public class Fundamental {
             }
         }
         return failed;
+    }
+
+    /**
+     * A function that will check to see which stocks passed the volatility test.
+     *
+     * @return liquidityPassed an arraylist of the stocks that passed the test
+     */
+    public ArrayList<String> fundamentalPassed(){
+        ArrayList<String> fundamentalPassed = new ArrayList<>();
+        ArrayList<String> failed = fundamentalFailed();
+        for (String stock : stockNetProfit.keySet()) {
+            if (!failed.contains(stock)){
+                fundamentalPassed.add(stock);
+            }
+        }
+        return fundamentalPassed;
+    }
+
+
+    /**
+     * A function that will check to see which stocks failed the liquidity test.
+     *
+     * @return liquidityFailed an arraylist of the stocks that failed the test
+     */
+    public ArrayList<String> fundamentalFailed(){
+        ArrayList<String> fundamentalFailed = new ArrayList<>();
+        for (String stock : stockNetProfit.keySet()) {
+            if (fundamentalCheckOne().contains(stock) || fundamentalCheckTwo().contains(stock)){
+                fundamentalFailed.add(stock);
+            }
+        }
+        return fundamentalFailed;
     }
 }
