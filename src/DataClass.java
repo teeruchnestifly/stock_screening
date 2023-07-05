@@ -10,6 +10,12 @@ public class DataClass {
 
     public static void main(String[] args) throws IOException {
 
+        Fundamental fundamental = new Fundamental();
+        fundamental.dataCollectionNetProfit();
+        fundamental.dataCollectionICR();
+        System.out.println(fundamental.fundamentalCheckOne());
+        System.out.println(fundamental.fundamentalCheckTwo());
+
         Volatility vol = new Volatility();
         Liquidity liq = new Liquidity();
         vol.dataCollection();

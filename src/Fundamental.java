@@ -3,10 +3,9 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 public class Fundamental {
@@ -31,16 +30,68 @@ public class Fundamental {
             Double profit = sheet.getRow(r).getCell(4).getNumericCellValue();
             stockNetProfit.get(stock).add(profit);
         }
-
+        dataCollectionHelper("2021 Net Profit.xlsx", stockNetProfit);
+        dataCollectionHelper("2020 Net Profit.xlsx", stockNetProfit);
+        dataCollectionHelper("2019 Net Profit.xlsx", stockNetProfit);
+        dataCollectionHelper("2018 Net Profit.xlsx", stockNetProfit);
+        for (String stock : stockNetProfit.keySet()) {
+            if (stockNetProfit.get(stock).size() != 5) {
+                for (int i = stockNetProfit.get(stock).size(); i < 5; i++) {
+                    stockNetProfit.get(stock).add(null);
+                }
+            }
+            Collections.reverse(stockNetProfit.get(stock));
+        }
+        System.out.println(stockNetProfit);
     }
 
-    public void dataCollectionHelper(String excelFilePath, String stock) throws IOException {
+    public void dataCollectionICR() throws IOException {
+        String excelFilePath = "2022 ICR.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(2);
+        Sheet sheet = workbook.getSheetAt(0);
+        for (int r = 13; r < sheet.getLastRowNum(); r++) {
+            String stock = sheet.getRow(r).getCell(0).getStringCellValue();
+            ArrayList<Double> ICR = new ArrayList<>();
+            stockICR.put(stock, ICR);
+            Double icr = sheet.getRow(r).getCell(4).getNumericCellValue();
+            stockICR.get(stock).add(icr);
+        }
+        dataCollectionHelper("2021 ICR.xlsx", stockICR);
+        dataCollectionHelper("2020 ICR.xlsx", stockICR);
+        dataCollectionHelper("2019 ICR.xlsx", stockICR);
+        dataCollectionHelper("2018 ICR.xlsx", stockICR);
+        for (String stock : stockICR.keySet()) {
+            if (stockICR.get(stock).size() != 5) {
+                for (int i = stockICR.get(stock).size(); i < 5; i++) {
+                    stockICR.get(stock).add(null);
+                }
+            }
+            Collections.reverse(stockICR.get(stock));
+        }
+        System.out.println(stockICR);
     }
-    //data collection ICR level
-        //add to a hashmap stockICR mapping list containing each years ICR
+
+
+    public void dataCollectionHelper(String excelFilePath, HashMap<String, ArrayList<Double>> stockData)
+            throws IOException {
+        FileInputStream inputStream = new FileInputStream(excelFilePath);
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet sheet = workbook.getSheetAt(0);
+        for (int r = 13; r < sheet.getLastRowNum(); r++) {
+            String stock = sheet.getRow(r).getCell(0).getStringCellValue();
+            Double profit = sheet.getRow(r).getCell(4).getNumericCellValue();
+            try {
+                stockData.get(stock).add(profit);
+            } catch (NullPointerException e1) {
+                ArrayList<Double> netProfit = new ArrayList<>();
+                stockData.put(stock, netProfit);
+                stockData.get(stock).add(profit);
+            }
+        }
+    }
+
+
 
 
     /**
@@ -54,10 +105,10 @@ public class Fundamental {
         for (String stock : stockNetProfit.keySet()) {
             int counter = 0;
             for (int i = 0; i < stockNetProfit.get(stock).size(); i++){
-                if(stockNetProfit.get(stock).get(i) < 0){
-                    counter+=1;
-                } else {
+                if(stockNetProfit.get(stock).get(i) == null || stockNetProfit.get(stock).get(i) >= 0){
                     counter = 0;
+                } else {
+                    counter += 1;
                 }
             }
             if(counter >= 4){
@@ -79,10 +130,10 @@ public class Fundamental {
         for (String stock : stockICR.keySet()) {
             int counter = 0;
             for (int i = 0; i < stockICR.get(stock).size(); i++){
-                if(stockICR.get(stock).get(i) < 1){
-                    counter+=1;
-                } else {
+                if(stockICR.get(stock).get(i) == null || stockICR.get(stock).get(i) >= 1){
                     counter = 0;
+                } else {
+                    counter += 1;
                 }
             }
             if(counter >= 4){
