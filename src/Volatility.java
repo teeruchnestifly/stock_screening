@@ -144,6 +144,8 @@ public class Volatility{
             Date currentDate = sheet.getRow(i).getCell(0).getDateCellValue();
             dates.add(currentDate);
         }
+//        System.out.println(stockClosingPrices.get("AAV"));
+//        System.out.println(dates);
     }
 
 

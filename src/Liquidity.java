@@ -50,6 +50,8 @@ public class Liquidity {
      * for each day in the last year, the stockMarketCap hashmap: mapping all stocks to an arraylist containing their
      * market cap for each day in the last year and the dates arraylist,storing every trading day in the year.
      */
+
+    //CHANGE TO START FROM FINAL DATE INSTEAD, LOOP BACKWARDS TO ADD DATA, IF DATASET LESS THAN MAXIMUM SIZE, ADD NULL THEN REVERSE
     public void dataCollection() throws IOException {
         String excelFilePath = "Liquidity Test.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
@@ -60,11 +62,18 @@ public class Liquidity {
             String stock;
             try {
                 stock = sheet.getRow(r).getCell(1).getStringCellValue();
+                if (!stockList.contains(stock)) {
+                    stockList.add(stock);
+                }
             } catch (IllegalStateException e1) {
                 stock = "TRUE";
+                if (!stockList.contains(stock)) {
+                    stockList.add(stock);
+                }
             }
-            if (!stockList.contains(stock)) {
-                stockList.add(stock);
+            Date currentDate = sheet.getRow(r).getCell(0).getDateCellValue();
+            if (!dates.contains(currentDate)) {
+                dates.add(currentDate);
             }
         }
         for (String stock : stockList) {
@@ -73,7 +82,7 @@ public class Liquidity {
             ArrayList<BigDecimal> marketCap = new ArrayList<>();
             stockMarketCap.put(stock, marketCap);
         }
-        for (int r = 1; r < sheet.getLastRowNum(); r++) {
+        for (int r = sheet.getLastRowNum(); r > 1; r--) {
             String stock;
             try {
                 stock = sheet.getRow(r).getCell(3).getStringCellValue();
@@ -84,15 +93,23 @@ public class Liquidity {
             BigDecimal marketCap;
             try {
                 marketCap = BigDecimal.valueOf(sheet.getRow(r).getCell(18).getNumericCellValue());
-            } catch (NullPointerException e2){
+            } catch (NullPointerException e2) {
                 marketCap = null;
             }
             helper(stock, marketCap, stockMarketCap);
-            Date currentDate = sheet.getRow(r).getCell(0).getDateCellValue();
-            if (!dates.contains(currentDate)){
-                dates.add(currentDate);
-            }
         }
+        for (String stock : stockTotalValue.keySet()) {
+            if(stockTotalValue.get(stock).size() != dates.size()){
+                for (int i = stockTotalValue.get(stock).size(); i < dates.size(); i++){
+                    stockTotalValue.get(stock).add(null);
+                    stockMarketCap.get(stock).add(null);
+                }
+            }
+            Collections.reverse(stockTotalValue.get(stock));
+            Collections.reverse(stockMarketCap.get(stock));
+        }
+        System.out.println(stockTotalValue.get("THANI"));
+        System.out.println(stockTotalValue.get("THANI"));
     }
 
 
@@ -128,30 +145,44 @@ public class Liquidity {
     public void calcAverages() {
         ArrayList<Integer> monthIndexes = calcMonths();
         for (String stock : stockMarketCap.keySet()) {
-            //STILL NEED TO FIND SOLUTION TO THIS CASE
-            if (stockTotalValue.get(stock).size() == 262) {
-                ArrayList<BigDecimal> averagedValues = new ArrayList<>();
-                BigDecimal total1 = BigDecimal.valueOf(0);
-                int numDays1 = 0;
-                for (int i = monthIndexes.get(0) + 1; i <= monthIndexes.get(1); i++) {
+            ArrayList<BigDecimal> averagedValues = new ArrayList<>();
+            BigDecimal total1 = BigDecimal.valueOf(0);
+            int numDays1 = 0;
+            int noDataCount1 = 0;
+            for (int i = monthIndexes.get(0) + 1; i <= monthIndexes.get(1); i++) {
+                if (stockTotalValue.get(stock).get(i) == null) {
+                    noDataCount1 += 1;
+                } else {
                     total1 = total1.add(stockTotalValue.get(stock).get(i));
-                    numDays1++;
                 }
+                numDays1++;
+            }
+            if (noDataCount1 == numDays1) {
+                averagedValues.add(null);
+            } else {
                 averagedValues.add((total1.divide(BigDecimal.valueOf(numDays1), MathContext.DECIMAL32)));
-                for (int j = 2; j < monthIndexes.size(); j++) {
-                    BigDecimal total = BigDecimal.valueOf(0);
-                    int numDays = 0;
-                    for (int i = monthIndexes.get(j - 1) + 1; i <= monthIndexes.get(j); i++) {
+            }
+            for (int j = 2; j < monthIndexes.size(); j++) {
+                BigDecimal total = BigDecimal.valueOf(0);
+                int numDays = 0;
+                int noDataCount = 0;
+                for (int i = monthIndexes.get(j - 1) + 1; i <= monthIndexes.get(j); i++) {
+                    if (stockTotalValue.get(stock).get(i) == null) {
+                        noDataCount += 1;
+                    } else {
                         total = total.add(stockTotalValue.get(stock).get(i));
-                        numDays++;
                     }
+                    numDays++;
+                }
+                if (noDataCount == numDays) {
+                    averagedValues.add(null);
+                } else {
                     averagedValues.add((total.divide(BigDecimal.valueOf(numDays), MathContext.DECIMAL32)));
                 }
                 stockTotalValueAveraged.put(stock, averagedValues);
-            } else {
-                stockTotalValueAveraged.put(stock, null);
             }
         }
+        System.out.println(stockTotalValueAveraged.get("THANI"));
     }
 
 
@@ -218,6 +249,7 @@ public class Liquidity {
                 failed.add(stock);
             }
         }
+        System.out.println("MAX CP" + stockMaxCP);
         return failed;
     }
 
@@ -229,20 +261,20 @@ public class Liquidity {
      *
      * @return maxCP, the stock's maximum collateral pledged.
      */
-    public BigDecimal maxCollateralPledged(String stock, BigDecimal stockFS){
+    public BigDecimal maxCollateralPledged(String stock, BigDecimal stockFS) {
         BigDecimal sum = BigDecimal.valueOf(0);
         BigDecimal maxCP;
-        if (stockTotalValueAveraged.get(stock) == null){
-            return null;
-        } else {
-            for (BigDecimal value : stockTotalValueAveraged.get(stock)) {
+        int numMonths = 0;
+        for (BigDecimal value : stockTotalValueAveraged.get(stock)) {
+            if (value != null){
                 sum = sum.add(value);
+                numMonths += 1;
             }
-            BigDecimal avgTradingValue = sum.divide(BigDecimal.valueOf(12), MathContext.DECIMAL32);
-            maxCP = avgTradingValue.multiply(FSDays).multiply(tradingValuePercent)
-                    .divide(stockFS, MathContext.DECIMAL32);
-            stockMaxCP.put(stock, maxCP);
         }
+        BigDecimal avgTradingValue = sum.divide(BigDecimal.valueOf(numMonths), MathContext.DECIMAL32);
+        maxCP = avgTradingValue.multiply(FSDays).multiply(tradingValuePercent)
+                .divide(stockFS, MathContext.DECIMAL32);
+        stockMaxCP.put(stock, maxCP);
         return maxCP;
     }
 
@@ -264,7 +296,7 @@ public class Liquidity {
                 try {
                     BigDecimal result = (stockMaxCP.get(stock)).divide(marketCap, MathContext.DECIMAL32);
                     stockMaxCPRatio.put(stock, result);
-                    if (result.compareTo(BigDecimal.valueOf(0.005)) > 0) {
+                    if (result.compareTo(BigDecimal.valueOf(0.05)) > 0) {
                         failed.add(stock);
                     }
                 } catch (ArithmeticException e4) {
@@ -289,7 +321,6 @@ public class Liquidity {
                 liquidityPassed.add(stock);
             }
         }
-        System.out.println("WORK:   " + stockMaxCP.get("WORK"));
         return liquidityPassed;
     }
 

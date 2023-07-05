@@ -59,6 +59,47 @@ public class DataClass {
         System.out.println("Stocks that failed all tests: " + vol.volatilityFailed());
         System.out.println(vol.volatilityFailed().size());
 
+        for (String stock : SET60) {
+            stockFSPortion.put(stock, 0.375);
+        }
+        for (String stock : SET50) {
+            stockFSPortion.put(stock, 0.5);
+        }
+        for (String stock : SET40) {
+            stockFSPortion.put(stock, 0.5833);
+        }
+
+
+        System.out.println();
+        System.out.println("Result of Liquidity test");
+        System.out.println();
+        liq.dataCollection();
+        liq.calcAverages();
+        ArrayList<String> liquidityPassed = liq.liqPassed(stockFSPortion);
+        ArrayList<String> liquidityFailed = liq.liqFailed(stockFSPortion);
+
+        System.out.println("Stocks that passed liquidity test: " + liquidityPassed);
+        System.out.println("Stocks that failed liquidity test: " + liquidityFailed);
+
+        ArrayList<String> MAX60Liq = SET60;
+        for (int i = 0; i < liquidityFailed.size(); i++){
+            MAX60Liq.remove(liquidityFailed.get(i));
+        }
+        ArrayList<String> MAX50Liq = SET50;
+        for (int i = 0; i < liquidityFailed.size(); i++){
+            MAX50Liq.remove(liquidityFailed.get(i));
+        }
+        ArrayList<String> MAX40Liq = SET40;
+        for (int i = 0; i < liquidityFailed.size(); i++){
+            MAX40Liq.remove(liquidityFailed.get(i));
+        }
+        System.out.println(MAX60Liq);
+        System.out.println(MAX60Liq.size());
+        System.out.println(MAX50Liq);
+        System.out.println(MAX50Liq.size());
+        System.out.println(MAX40Liq);
+        System.out.println(MAX40Liq.size());
+
         PF_REIT_IFF pf = new PF_REIT_IFF();
         ArrayList<String> MAX60 = new ArrayList<>();
         ArrayList<String> MAX50 = new ArrayList<>();
@@ -69,7 +110,7 @@ public class DataClass {
             if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
                     !(pf.IFFCollection().contains(stock))) {
                 MAX60.add(stock);
-            stockFSPortion.put(stock, 0.375);
+                stockFSPortion.put(stock, 0.375);
             } else {
                 removedStocks.add(stock);
             }
@@ -78,7 +119,7 @@ public class DataClass {
             if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
                     !(pf.IFFCollection().contains(stock))) {
                 MAX50.add(stock);
-            stockFSPortion.put(stock, 0.5);
+                stockFSPortion.put(stock, 0.5);
             } else {
                 removedStocks.add(stock);
             }
@@ -87,7 +128,7 @@ public class DataClass {
             if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
                     !(pf.IFFCollection().contains(stock))) {
                 MAX40.add(stock);
-            stockFSPortion.put(stock, 0.5833);
+                stockFSPortion.put(stock, 0.5833);
             } else {
                 removedStocks.add(stock);
             }
@@ -105,35 +146,5 @@ public class DataClass {
         System.out.println("Stocks removed: " + removedStocks);
         System.out.println(removedStocks.size());
 
-
-        System.out.println();
-        System.out.println("Result of Liquidity test");
-        System.out.println();
-        liq.dataCollection();
-        liq.calcAverages();
-        ArrayList<String> liquidityPassed = liq.liqPassed(stockFSPortion);
-        ArrayList<String> liquidityFailed = liq.liqFailed(stockFSPortion);
-
-        System.out.println("Stocks that passed liquidity test: " + liquidityPassed);
-        System.out.println("Stocks that failed liquidity test: " + liquidityFailed);
-
-        ArrayList<String> MAX60Liq = MAX60;
-        for (int i = 0; i < liquidityFailed.size(); i++){
-            MAX60Liq.remove(liquidityFailed.get(i));
-        }
-        ArrayList<String> MAX50Liq = MAX50;
-        for (int i = 0; i < liquidityFailed.size(); i++){
-            MAX50Liq.remove(liquidityFailed.get(i));
-        }
-        ArrayList<String> MAX40Liq = MAX40;
-        for (int i = 0; i < liquidityFailed.size(); i++){
-            MAX40Liq.remove(liquidityFailed.get(i));
-        }
-        System.out.println(MAX60Liq);
-        System.out.println(MAX60Liq.size());
-        System.out.println(MAX50Liq);
-        System.out.println(MAX50Liq.size());
-        System.out.println(MAX40Liq);
-        System.out.println(MAX40Liq.size());
     }
 }
