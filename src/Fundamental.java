@@ -92,8 +92,6 @@ public class Fundamental {
     }
 
 
-
-
     /**
      * A function that will perform the first fundamental check by looping through the net profit levels for each stock
      * over the course of 5 years. If there are 4 consecutive years of losses, the stock fails.

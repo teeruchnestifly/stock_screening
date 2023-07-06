@@ -6,6 +6,7 @@ import java.util.HashMap;
 public class DataClass {
 
     public static HashMap<String, Double> stockFSPortion = new HashMap<>();
+    public static HashMap<String, Double> stockMaxLTV = new HashMap<>();
     public static Integer simulatedTenor = 9;
 
     public static void main(String[] args) throws IOException {
@@ -63,12 +64,15 @@ public class DataClass {
 
         for (String stock : SET60) {
             stockFSPortion.put(stock, 0.375);
+            stockMaxLTV.put(stock, 0.6);
         }
         for (String stock : SET50) {
             stockFSPortion.put(stock, 0.5);
+            stockMaxLTV.put(stock, 0.5);
         }
         for (String stock : SET40) {
             stockFSPortion.put(stock, 0.5833);
+            stockMaxLTV.put(stock, 0.4);
         }
 
 
@@ -77,8 +81,8 @@ public class DataClass {
         System.out.println();
         liq.dataCollection();
         liq.calcAverages();
-        ArrayList<String> liquidityPassed = liq.liqPassed(stockFSPortion);
-        ArrayList<String> liquidityFailed = liq.liqFailed(stockFSPortion);
+        ArrayList<String> liquidityPassed = liq.liqPassed(stockFSPortion, stockMaxLTV);
+        ArrayList<String> liquidityFailed = liq.liqFailed(stockFSPortion, stockMaxLTV);
 
         System.out.println("Stocks that passed liquidity test: " + liquidityPassed);
         System.out.println("Stocks that failed liquidity test: " + liquidityFailed);

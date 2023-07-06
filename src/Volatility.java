@@ -69,6 +69,8 @@ public class Volatility{
      * of its LTV over the course of the 5 years.
      */
     private HashMap<String, Double> weightedAverage = new HashMap<>();
+    private HashMap<String, Integer> minCount3y = new HashMap<>();
+
     /**
      * Constant for when the Excel spreadsheet has NA for the closing price.
      */
@@ -548,6 +550,7 @@ public class Volatility{
             if (minDays < checkTwoFailCondition) {
                 failed.add(stock);
             }
+            minCount3y.put(stock, minDays);
         }
         return failed;
     }

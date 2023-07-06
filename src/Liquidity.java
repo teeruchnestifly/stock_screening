@@ -29,7 +29,19 @@ public class Liquidity {
      * A hashmap mapping all stocks to a big decimal representing their max collateral pledged.
      */
     private final HashMap<String, BigDecimal> stockMaxCP = new HashMap<>();
+    /**
+     * A hashmap mapping all stocks to a big decimal representing their max collateral pledged to Market Cap ratio.
+     */
     private final HashMap<String, BigDecimal> stockMaxCPRatio = new HashMap<>();
+    /**
+     * A hashmap mapping all stocks to a big decimal representing their max loan.
+     */
+    private final HashMap<String, BigDecimal> stockMaxLoan = new HashMap<>();
+    /**
+     * A hashmap mapping all stocks to a big decimal representing their max loan to market cap ratio.
+     */
+    private final HashMap<String, BigDecimal> stockMaxLoandivMC = new HashMap<>();
+
     /**
      * A list containing all trading days in the last year.
      */
@@ -50,8 +62,6 @@ public class Liquidity {
      * for each day in the last year, the stockMarketCap hashmap: mapping all stocks to an arraylist containing their
      * market cap for each day in the last year and the dates arraylist,storing every trading day in the year.
      */
-
-    //CHANGE TO START FROM FINAL DATE INSTEAD, LOOP BACKWARDS TO ADD DATA, IF DATASET LESS THAN MAXIMUM SIZE, ADD NULL THEN REVERSE
     public void dataCollection() throws IOException {
         String excelFilePath = "Liquidity Test.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
@@ -108,8 +118,6 @@ public class Liquidity {
             Collections.reverse(stockTotalValue.get(stock));
             Collections.reverse(stockMarketCap.get(stock));
         }
-//        System.out.println(stockTotalValue.get("THANI"));
-//        System.out.println(stockTotalValue.get("THANI"));
     }
 
 
@@ -182,7 +190,6 @@ public class Liquidity {
                 stockTotalValueAveraged.put(stock, averagedValues);
             }
         }
-//        System.out.println(stockTotalValueAveraged.get("THANI"));
     }
 
 
@@ -235,7 +242,7 @@ public class Liquidity {
      *
      * @return failed an arraylist of the stocks that failed the test
      */
-    public ArrayList<String> liqCheckOne(HashMap<String, Double> stockFSPortion) {
+    public ArrayList<String> liqCheckOne(HashMap<String, Double> stockFSPortion, HashMap<String, Double> stockMaxLTV) {
         ArrayList<String> failed = new ArrayList<>();
         for (String stock : stockMarketCap.keySet()) {
             BigDecimal stockFS;
@@ -244,12 +251,17 @@ public class Liquidity {
             } else {
                 stockFS = BigDecimal.valueOf(stockFSPortion.get(stock));
             }
-            BigDecimal result = maxCollateralPledged(stock, stockFS);
+            BigDecimal stockMaxLtv;
+            if (stockMaxLTV.get(stock) == null){
+                stockMaxLtv = BigDecimal.valueOf(0.5);
+            } else {
+                stockMaxLtv = BigDecimal.valueOf(stockMaxLTV.get(stock));
+            }
+            BigDecimal result = maxCollateralPledged(stock, stockFS, stockMaxLtv);
             if ( result == null || result.compareTo(BigDecimal.valueOf(10000000)) < 0){
                 failed.add(stock);
             }
         }
-//        System.out.println("MAX CP" + stockMaxCP);
         return failed;
     }
 
@@ -261,12 +273,12 @@ public class Liquidity {
      *
      * @return maxCP, the stock's maximum collateral pledged.
      */
-    public BigDecimal maxCollateralPledged(String stock, BigDecimal stockFS) {
+    public BigDecimal maxCollateralPledged(String stock, BigDecimal stockFS, BigDecimal stockMaxLtv) {
         BigDecimal sum = BigDecimal.valueOf(0);
         BigDecimal maxCP;
         int numMonths = 0;
         for (BigDecimal value : stockTotalValueAveraged.get(stock)) {
-            if (value != null){
+            if (value != null) {
                 sum = sum.add(value);
                 numMonths += 1;
             }
@@ -275,6 +287,19 @@ public class Liquidity {
         maxCP = avgTradingValue.multiply(FSDays).multiply(tradingValuePercent)
                 .divide(stockFS, MathContext.DECIMAL32);
         stockMaxCP.put(stock, maxCP);
+        stockMaxLoan.put(stock, maxCP.multiply(stockMaxLtv));
+        if (stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1) == null ||
+                stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1).equals(BigDecimal.valueOf(0)) ||
+                stockMaxCP.get(stock) == null || stockMaxCP.get(stock).equals(BigDecimal.valueOf(0))) {
+            stockMaxLoandivMC.put(stock, null);
+        } else {
+            try {
+                stockMaxLoandivMC.put(stock, maxCP.multiply(stockMaxLtv).
+                        divide(stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1), MathContext.DECIMAL32));
+            } catch (ArithmeticException divUndefined) {
+                stockMaxLoandivMC.put(stock, null);
+            }
+        }
         return maxCP;
     }
 
@@ -296,7 +321,7 @@ public class Liquidity {
                 try {
                     BigDecimal result = (stockMaxCP.get(stock)).divide(marketCap, MathContext.DECIMAL32);
                     stockMaxCPRatio.put(stock, result);
-                    if (result.compareTo(BigDecimal.valueOf(0.05)) > 0) {
+                    if (result.compareTo(BigDecimal.valueOf(0.005)) > 0) {
                         failed.add(stock);
                     }
                 } catch (ArithmeticException e4) {
@@ -313,9 +338,9 @@ public class Liquidity {
      *
      * @return liquidityPassed an arraylist of the stocks that passed the test
      */
-    public ArrayList<String> liqPassed(HashMap<String, Double> stockFSPortion){
+    public ArrayList<String> liqPassed(HashMap<String, Double> stockFSPortion, HashMap<String, Double> stockMaxLTV){
         ArrayList<String> liquidityPassed = new ArrayList<>();
-        ArrayList<String> failed = liqFailed(stockFSPortion);
+        ArrayList<String> failed = liqFailed(stockFSPortion, stockMaxLTV);
         for (String stock : stockMarketCap.keySet()) {
             if (!failed.contains(stock)){
                 liquidityPassed.add(stock);
@@ -330,10 +355,10 @@ public class Liquidity {
      *
      * @return liquidityFailed an arraylist of the stocks that failed the test
      */
-    public ArrayList<String> liqFailed(HashMap<String, Double> stockFSPortion){
+    public ArrayList<String> liqFailed(HashMap<String, Double> stockFSPortion, HashMap<String, Double> stockMaxLTV){
         ArrayList<String> liquidityFailed = new ArrayList<>();
         for (String stock : stockMarketCap.keySet()) {
-            if (liqCheckOne(stockFSPortion).contains(stock) || liqCheckTwo().contains(stock)){
+            if (liqCheckOne(stockFSPortion, stockMaxLTV).contains(stock) || liqCheckTwo().contains(stock)){
                 liquidityFailed.add(stock);
             }
         }
