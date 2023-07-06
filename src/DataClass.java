@@ -111,7 +111,7 @@ public class DataClass {
         ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
         ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
 
-        System.out.println("Result of Liquidity test");
+        System.out.println("Result of Fundamental test");
         System.out.println();
         System.out.println("Stocks that passed fundamental test: " + fundamentalPassed);
         System.out.println("Stocks that failed fundamental test: " + fundamentalFailed);

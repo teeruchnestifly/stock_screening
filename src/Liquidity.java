@@ -76,28 +76,10 @@ public class Liquidity {
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(2);
         for (int r = 1; r < sheet.getLastRowNum(); r++) {
-            String stock;
-            try {
-                stock = sheet.getRow(r).getCell(1).getStringCellValue();
-                if (!stockList.contains(stock)) {
-                    stockList.add(stock);
-                }
-            } catch (IllegalStateException e1) {
-                stock = "TRUE";
-                if (!stockList.contains(stock)) {
-                    stockList.add(stock);
-                }
-            }
             Date currentDate = sheet.getRow(r).getCell(0).getDateCellValue();
             if (!dates.contains(currentDate)) {
                 dates.add(currentDate);
             }
-        }
-        for (String stock : stockList) {
-            ArrayList<BigDecimal> totalValue = new ArrayList<>();
-            stockTotalValue.put(stock, totalValue);
-            ArrayList<BigDecimal> marketCap = new ArrayList<>();
-            stockMarketCap.put(stock, marketCap);
         }
         for (int r = sheet.getLastRowNum(); r > 1; r--) {
             String stock;

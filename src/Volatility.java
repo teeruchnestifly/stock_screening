@@ -69,6 +69,9 @@ public class Volatility{
      * of its LTV over the course of the 5 years.
      */
     private HashMap<String, Double> weightedAverage = new HashMap<>();
+    /** A hashmap mapping each stock to an integer representing the minimum difference in days between a closing price
+     * reaching 75% to 100% of its LTV
+     */
     private HashMap<String, Integer> minCount3y = new HashMap<>();
 
     /**
@@ -246,7 +249,6 @@ public class Volatility{
             if (Objects.equals(closePrice, BigDecimal.valueOf(noData))) {
                 LTVvals.add(BigDecimal.valueOf(noDataDouble));
             } else {
-                // Add try catch error here + elsewhere in code
                 BigDecimal bdec = closePrice;
                 bdec = bdec.multiply(new BigDecimal(LTV));
                 LTVvals.add(bdec.divide(new BigDecimal(percent), MathContext.DECIMAL32));
