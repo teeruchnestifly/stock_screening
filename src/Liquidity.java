@@ -61,7 +61,7 @@ public class Liquidity {
     /**
      * Constant used to determine the failing condition of the second check.
      */
-    private static final double checkTwoFailCondition = 0.005;
+    private static final double checkTwoFailCondition = 0.05;
 
 
     /**

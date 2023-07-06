@@ -85,16 +85,16 @@ public class DataClass {
         System.out.println("Stocks that failed liquidity test: " + liquidityFailed);
 
         ArrayList<String> MAX60Liq = SET60;
-        for (int i = 0; i < liquidityFailed.size(); i++){
-            MAX60Liq.remove(liquidityFailed.get(i));
+        for (String value : liquidityFailed) {
+            MAX60Liq.remove(value);
         }
         ArrayList<String> MAX50Liq = SET50;
-        for (int i = 0; i < liquidityFailed.size(); i++){
-            MAX50Liq.remove(liquidityFailed.get(i));
+        for (String s : liquidityFailed) {
+            MAX50Liq.remove(s);
         }
         ArrayList<String> MAX40Liq = SET40;
-        for (int i = 0; i < liquidityFailed.size(); i++){
-            MAX40Liq.remove(liquidityFailed.get(i));
+        for (String s : liquidityFailed) {
+            MAX40Liq.remove(s);
         }
         System.out.println();
         System.out.println("SET60: " + MAX60Liq);
@@ -118,16 +118,16 @@ public class DataClass {
         System.out.println();
 
         ArrayList<String> MAX60fund = MAX60Liq;
-        for (int i = 0; i < fundamentalFailed.size(); i++){
-            MAX60fund.remove(fundamentalFailed.get(i));
+        for (String s : fundamentalFailed) {
+            MAX60fund.remove(s);
         }
         ArrayList<String> MAX50fund = MAX50Liq;
-        for (int i = 0; i < fundamentalFailed.size(); i++){
-            MAX50fund.remove(fundamentalFailed.get(i));
+        for (String s : fundamentalFailed) {
+            MAX50fund.remove(s);
         }
         ArrayList<String> MAX40fund = MAX40Liq;
-        for (int i = 0; i < fundamentalFailed.size(); i++){
-            MAX40fund.remove(fundamentalFailed.get(i));
+        for (String s : fundamentalFailed) {
+            MAX40fund.remove(s);
         }
 
         System.out.println("SET60: " + MAX60fund);
