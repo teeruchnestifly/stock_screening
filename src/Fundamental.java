@@ -10,14 +10,23 @@ import java.util.HashMap;
 
 public class Fundamental {
 
+    /**
+     * A hashmap mapping all stocks to an arraylist storing their annual net profit.
+     */
     private final HashMap<String, ArrayList<Double>> stockNetProfit = new HashMap<>();
+    /**
+     * A hashmap mapping all stocks to an arraylist storing their annual ICR.
+     */
     private final HashMap<String, ArrayList<Double>> stockICR = new HashMap<>();
 
 
-    //data collection net profit
-        //add to a hashmap stockNetProfit mapping list containing each years profit
-
-    //start at most recent date, loop through and add
+    /**
+     * Reads in the data stored in the most recent Excel file and creates a hashmap stockNetProfit containing
+     * every stock mapped to an array list of its profit levels.
+     *
+     * Updates the stockNetProfit hashmap, storing the profit for every stock.
+     *
+     */
     public void dataCollectionNetProfit() throws IOException {
         String excelFilePath = "2022 Net Profit.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
@@ -42,9 +51,16 @@ public class Fundamental {
             }
             Collections.reverse(stockNetProfit.get(stock));
         }
-//        System.out.println(stockNetProfit);
     }
 
+
+    /**
+     * Reads in the data stored in the most recent Excel file and creates a hashmap stockICR containing
+     * every stock mapped to an array list of its ICR levels.
+     *
+     * Updates the stockICR hashmap, storing the ICR for every stock.
+     *
+     */
     public void dataCollectionICR() throws IOException {
         String excelFilePath = "2022 ICR.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
@@ -69,10 +85,17 @@ public class Fundamental {
             }
             Collections.reverse(stockICR.get(stock));
         }
-//        System.out.println(stockICR);
     }
 
 
+    /**
+     * A helper function which is used to read through and store data from the eight other files with data for net profit
+     * and ICR.
+     *
+     * @param excelFilePath the name of the file to be read
+     * @param stockData the hashmap being added to (either stockNetProfit or stockICR)
+     *
+     */
     public void dataCollectionHelper(String excelFilePath, HashMap<String, ArrayList<Double>> stockData)
             throws IOException {
         FileInputStream inputStream = new FileInputStream(excelFilePath);
@@ -142,9 +165,9 @@ public class Fundamental {
     }
 
     /**
-     * A function that will check to see which stocks passed the volatility test.
+     * A function that will check to see which stocks passed the fundamental test.
      *
-     * @return liquidityPassed an arraylist of the stocks that passed the test
+     * @return fundamentalPassed an arraylist of the stocks that passed the test.
      */
     public ArrayList<String> fundamentalPassed(){
         ArrayList<String> fundamentalPassed = new ArrayList<>();
@@ -159,9 +182,9 @@ public class Fundamental {
 
 
     /**
-     * A function that will check to see which stocks failed the liquidity test.
+     * A function that will check to see which stocks failed the fundamental test.
      *
-     * @return liquidityFailed an arraylist of the stocks that failed the test
+     * @return fundamentalFailed an arraylist of the stocks that failed the test.
      */
     public ArrayList<String> fundamentalFailed(){
         ArrayList<String> fundamentalFailed = new ArrayList<>();
