@@ -54,6 +54,14 @@ public class Liquidity {
      * A constant used in the calculation of max collateral pledged.
      */
     private static final BigDecimal tradingValuePercent = BigDecimal.valueOf(0.15);
+    /**
+     * Constant used to determine the failing condition of the first check.
+     */
+    private static final Integer checkOneFailCondition = 10000000;
+    /**
+     * Constant used to determine the failing condition of the second check.
+     */
+    private static final double checkTwoFailCondition = 0.005;
 
 
     /**
@@ -67,7 +75,6 @@ public class Liquidity {
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(2);
-
         for (int r = 1; r < sheet.getLastRowNum(); r++) {
             String stock;
             try {
@@ -147,7 +154,6 @@ public class Liquidity {
     /**
      * A function that will calculate and store the averaged total values of a given stock. In order to do this,
      * the function must calculate one-month intervals. These 12 periods will store the averaged total values.
-     *
      * Updates stockTotalValueAveraged which maps each stock to a list of their averaged total values.
      */
     public void calcAverages() {
@@ -258,7 +264,7 @@ public class Liquidity {
                 stockMaxLtv = BigDecimal.valueOf(stockMaxLTV.get(stock));
             }
             BigDecimal result = maxCollateralPledged(stock, stockFS, stockMaxLtv);
-            if ( result == null || result.compareTo(BigDecimal.valueOf(10000000)) < 0){
+            if ( result == null || result.compareTo(BigDecimal.valueOf(checkOneFailCondition)) < 0){
                 failed.add(stock);
             }
         }
@@ -321,7 +327,7 @@ public class Liquidity {
                 try {
                     BigDecimal result = (stockMaxCP.get(stock)).divide(marketCap, MathContext.DECIMAL32);
                     stockMaxCPRatio.put(stock, result);
-                    if (result.compareTo(BigDecimal.valueOf(0.005)) > 0) {
+                    if (result.compareTo(BigDecimal.valueOf(checkTwoFailCondition)) > 0) {
                         failed.add(stock);
                     }
                 } catch (ArithmeticException e4) {

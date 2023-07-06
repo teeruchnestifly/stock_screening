@@ -102,10 +102,8 @@ public class Volatility{
      * Reads in the data stored in the given master data Excel file and creates a hashmap stockClosingPrice containing
      * every stock mapped to an array list of its closing prices and creates an arraylist dates containing every date
      * in the 5-year period.
-     *
      * Updates the stockClosingPrices hashmap, storing the closing prices for every stock and the dates arraylist,
      * storing every date from the Excel file
-     *
      */
     public void dataCollection() throws IOException {
         String excelFilePath = "Data File.xlsx";
@@ -146,8 +144,6 @@ public class Volatility{
             Date currentDate = sheet.getRow(i).getCell(0).getDateCellValue();
             dates.add(currentDate);
         }
-//        System.out.println(stockClosingPrices.get("AAV"));
-//        System.out.println(dates);
     }
 
 
@@ -163,7 +159,7 @@ public class Volatility{
         // Will first calculate the index of the date corresponding to the number of months in the simulation length
         // before the reporting date
         Date reportDate = dates.get(dates.size() - 1);  // Report date is the most recent date in the list
-        Integer reportIndexSubmonths = helperDate(simulationLength, reportDate) - 1;
+        int reportIndexSubmonths = helperDate(simulationLength, reportDate) - 1;
         // Loops through every date up until reportIndexSubMonths which is the index of the date
         do {
             rowCount.clear();
@@ -222,7 +218,6 @@ public class Volatility{
      * period.
      *
      * @param LTV the specified LTV value for the simulation
-     *
      * Updates the hashmaps stock75LTV and stock100LTV which contain the values of 75% and 100% LTV for each closing
      * price respectively .
      */
@@ -252,9 +247,6 @@ public class Volatility{
                 LTVvals.add(BigDecimal.valueOf(noDataDouble));
             } else {
                 // Add try catch error here + elsewhere in code
-//                double notRounded = (closePrice * LTV) / percent;
-//                double rounded = Math.round(notRounded * 100.0) / 100.0;
-//                LTVvals.add(rounded);
                 BigDecimal bdec = closePrice;
                 bdec = bdec.multiply(new BigDecimal(LTV));
                 LTVvals.add(bdec.divide(new BigDecimal(percent), MathContext.DECIMAL32));
@@ -267,7 +259,6 @@ public class Volatility{
     /**
      * A function that will calculate and store the number of times the closing price reached 75 or 100% of its LTV
      * during the simulation length, for every stock.
-     *
      * Updates the hashmaps count75 and count100 which contain the number of times the closing price reached 75% and
      * 100% of its value. Also updates difference75to100 which contains the number of days it takes for the closing
      * price to drop from 75% to 100% of its value.
@@ -334,7 +325,6 @@ public class Volatility{
 
     /**
      * A function that will calculate and store the probability of the stock's closing price reaching 75 or 100% LTV.
-     *
      * Updates the hashmaps prob75 and prob100 which contain the probability that the stock will fall to 75% of its LTV
      * value during the simulation length.
      */

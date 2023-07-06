@@ -21,11 +21,9 @@ public class Fundamental {
 
 
     /**
-     * Reads in the data stored in the most recent Excel file and creates a hashmap stockNetProfit containing
-     * every stock mapped to an array list of its profit levels.
-     *
+     * Reads in the data stored in the most recent Excel file and creates a hashmap stockNetProfit containing every
+     * stock mapped to an array list of its profit levels.
      * Updates the stockNetProfit hashmap, storing the profit for every stock.
-     *
      */
     public void dataCollectionNetProfit() throws IOException {
         String excelFilePath = "2022 Net Profit.xlsx";
@@ -55,11 +53,9 @@ public class Fundamental {
 
 
     /**
-     * Reads in the data stored in the most recent Excel file and creates a hashmap stockICR containing
-     * every stock mapped to an array list of its ICR levels.
-     *
+     * Reads in the data stored in the most recent Excel file and creates a hashmap stockICR containing every stock
+     * mapped to an array list of its ICR levels.
      * Updates the stockICR hashmap, storing the ICR for every stock.
-     *
      */
     public void dataCollectionICR() throws IOException {
         String excelFilePath = "2022 ICR.xlsx";
@@ -163,6 +159,7 @@ public class Fundamental {
         }
         return failed;
     }
+
 
     /**
      * A function that will check to see which stocks passed the fundamental test.

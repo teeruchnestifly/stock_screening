@@ -11,13 +11,11 @@ public class DataClass {
 
     public static void main(String[] args) throws IOException {
 
-
         Volatility vol = new Volatility();
         Liquidity liq = new Liquidity();
         Fundamental fundamental = new Fundamental();
         vol.dataCollection();
         vol.numDaysForward(simulatedTenor);
-
 
 //      Call for LTV60 Simulation
         vol.LTVVal(0.6);
@@ -29,7 +27,6 @@ public class DataClass {
 
         System.out.println("Stocks classed as SET60: " + SET60);
         System.out.println(SET60.size());
-
 
 //      Call for LTV50 Simulation
         vol.LTVVal(0.5);
@@ -99,12 +96,14 @@ public class DataClass {
         for (int i = 0; i < liquidityFailed.size(); i++){
             MAX40Liq.remove(liquidityFailed.get(i));
         }
-        System.out.println(MAX60Liq);
+        System.out.println();
+        System.out.println("SET60: " + MAX60Liq);
         System.out.println(MAX60Liq.size());
-        System.out.println(MAX50Liq);
+        System.out.println("SET50: " + MAX50Liq);
         System.out.println(MAX50Liq.size());
-        System.out.println(MAX40Liq);
+        System.out.println("SET40: " + MAX40Liq);
         System.out.println(MAX40Liq.size());
+        System.out.println();
 
 
         fundamental.dataCollectionNetProfit();
@@ -112,8 +111,11 @@ public class DataClass {
         ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
         ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
 
+        System.out.println("Result of Liquidity test");
+        System.out.println();
         System.out.println("Stocks that passed fundamental test: " + fundamentalPassed);
         System.out.println("Stocks that failed fundamental test: " + fundamentalFailed);
+        System.out.println();
 
         ArrayList<String> MAX60fund = MAX60Liq;
         for (int i = 0; i < fundamentalFailed.size(); i++){
@@ -128,11 +130,11 @@ public class DataClass {
             MAX40fund.remove(fundamentalFailed.get(i));
         }
 
-        System.out.println(MAX60fund);
+        System.out.println("SET60: " + MAX60fund);
         System.out.println(MAX60fund.size());
-        System.out.println(MAX50fund);
+        System.out.println("SET50: " + MAX50fund);
         System.out.println(MAX50fund.size());
-        System.out.println(MAX40fund);
+        System.out.println("SET40: " + MAX40fund);
         System.out.println(MAX40fund.size());
 
         PF_REIT_IFF pf = new PF_REIT_IFF();
@@ -177,6 +179,5 @@ public class DataClass {
         System.out.println(MAX40.size());
         System.out.println("Stocks removed: " + removedStocks);
         System.out.println(removedStocks.size());
-
     }
 }
