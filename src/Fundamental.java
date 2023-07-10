@@ -1,12 +1,18 @@
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
+import java.time.*;
 
 public class Fundamental {
 
@@ -18,6 +24,14 @@ public class Fundamental {
      * A hashmap mapping all stocks to an arraylist storing their annual ICR.
      */
     private final HashMap<String, ArrayList<Double>> stockICR = new HashMap<>();
+    private final HashMap<String, String> stockProfitResults = new HashMap<>();
+    private final HashMap<String, String> stockICRResults = new HashMap<>();
+    private final HashMap<String, String> stockFinalResults = new HashMap<>();
+    private final HashMap<String, String> stockMarket = new HashMap<>();
+    final static DateTimeFormatter CUSTOM_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm");
+
+
+
 
 
     /**
@@ -32,6 +46,8 @@ public class Fundamental {
         Sheet sheet = workbook.getSheetAt(0);
         for (int r = 13; r < sheet.getLastRowNum(); r++) {
             String stock = sheet.getRow(r).getCell(0).getStringCellValue();
+            String market = sheet.getRow(r).getCell(1).getStringCellValue();
+            stockMarket.put(stock, market);
             ArrayList<Double> netProfit = new ArrayList<>();
             stockNetProfit.put(stock, netProfit);
             Double profit = sheet.getRow(r).getCell(4).getNumericCellValue();
@@ -106,6 +122,8 @@ public class Fundamental {
                 ArrayList<Double> netProfit = new ArrayList<>();
                 stockData.put(stock, netProfit);
                 stockData.get(stock).add(profit);
+                String market = sheet.getRow(r).getCell(1).getStringCellValue();
+                stockMarket.put(stock, market);
             }
         }
     }
@@ -130,6 +148,9 @@ public class Fundamental {
             }
             if(counter >= 4){
                 failed.add(stock);
+                stockProfitResults.put(stock, "Fail");
+            } else {
+                stockProfitResults.put(stock, "Pass");
             }
         }
         return failed;
@@ -155,6 +176,9 @@ public class Fundamental {
             }
             if(counter >= 4){
                 failed.add(stock);
+                stockICRResults.put(stock, "Fail");
+            } else {
+                stockICRResults.put(stock, "Pass");
             }
         }
         return failed;
@@ -172,6 +196,7 @@ public class Fundamental {
         for (String stock : stockNetProfit.keySet()) {
             if (!failed.contains(stock)){
                 fundamentalPassed.add(stock);
+                stockFinalResults.put(stock, "Pass");
             }
         }
         return fundamentalPassed;
@@ -188,8 +213,129 @@ public class Fundamental {
         for (String stock : stockNetProfit.keySet()) {
             if (fundamentalCheckOne().contains(stock) || fundamentalCheckTwo().contains(stock)){
                 fundamentalFailed.add(stock);
+                stockFinalResults.put(stock, "Fail");
             }
         }
         return fundamentalFailed;
+    }
+
+    public void getTemplateFile() throws IOException {
+        String excelFilePath = "Result Template of Fundamental Test.xlsx";
+        FileInputStream inputStream = new FileInputStream(excelFilePath);
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet profit = workbook.getSheetAt(1);
+        helperResult(profit, stockNetProfit, stockProfitResults);
+        Sheet ICR = workbook.getSheetAt(2);
+        helperResult(ICR, stockICR, stockICRResults);
+        Sheet Summary = workbook.getSheetAt(0);
+        helperSummary(Summary);
+        inputStream.close();
+//        LocalDateTime ldt = LocalDateTime.now();
+//        String time = ldt.format(CUSTOM_FORMATTER);
+//        String newFileName = "Fundamental_Test_Result_" + time + ".xls";
+        FileOutputStream outputStream = new FileOutputStream("Fundamental_Test_Result.xls");
+        workbook.write(outputStream);
+        workbook.close();
+        outputStream.close();
+    }
+
+    public void helperSummary(Sheet sheet){
+        int rowCount = 2;
+//        Cell date = sheet.getRow(0).getCell(1);
+//        date.setCellValue();
+        for (String stock : stockMarket.keySet()) {
+            Row row = sheet.createRow(rowCount);
+            Cell numStock = row.createCell(0);
+            numStock.setCellValue(rowCount - 1);
+            Cell stockCell = row.createCell(1);
+            stockCell.setCellValue(stock);
+            Cell marketCell = row.createCell(2);
+            marketCell.setCellValue(stockMarket.get(stock));
+            Cell profitTest = row.createCell(3);
+            try{
+                profitTest.setCellValue(stockProfitResults.get(stock));
+            } catch (NullPointerException e2) {
+                profitTest.setCellValue("#N/A");
+            }
+            Cell ICRTest = row.createCell(4);
+            try {
+                if (stockICRResults.get(stock) == null){
+                    ICRTest.setCellValue("#N/A");
+                } else {
+                    ICRTest.setCellValue(stockICRResults.get(stock));
+                }
+            } catch (NullPointerException e3){
+                ICRTest.setCellValue("#N/A");
+            }
+            Cell overallResult = row.createCell(5);
+            overallResult.setCellValue(stockFinalResults.get(stock));
+            rowCount ++;
+        }
+    }
+    public void helperResult(Sheet sheet, HashMap<String, ArrayList<Double>> resultList,
+                             HashMap<String, String> finalResultList){
+        int rowCount = 1;
+        for (String stock : resultList.keySet()) {
+            Row row = sheet.createRow(rowCount);
+            Cell numStock = row.createCell(0);
+            numStock.setCellValue(rowCount);
+            Cell stockCell = row.createCell(1);
+            stockCell.setCellValue(stock);
+            Cell marketCell = row.createCell(2);
+            marketCell.setCellValue(stockMarket.get(stock));
+            Cell yOne = row.createCell(3);
+            try {
+                if (resultList.get(stock).get(0) == null){
+                    yOne.setCellValue("#N/A");
+                } else {
+                    yOne.setCellValue(resultList.get(stock).get(0));
+                }
+            } catch (NullPointerException e1) {
+                yOne.setCellValue("#N/A");
+            }
+            Cell yTwo = row.createCell(4);
+            try {
+                if (resultList.get(stock).get(1) == null) {
+                    yTwo.setCellValue("#N/A");
+                } else {
+                    yTwo.setCellValue(resultList.get(stock).get(1));
+                }
+            } catch (NullPointerException e1) {
+            yOne.setCellValue("#N/A");
+            }
+            Cell yThree = row.createCell(5);
+            try {
+                if (resultList.get(stock).get(2) == null) {
+                    yThree.setCellValue("#N/A");
+                } else {
+                    yThree.setCellValue(resultList.get(stock).get(2));
+                }
+            } catch (NullPointerException e1) {
+                yOne.setCellValue("#N/A");
+            }
+            Cell yFour = row.createCell(6);
+            try {
+                if (resultList.get(stock).get(3) == null) {
+                    yFour.setCellValue("#N/A");
+                } else {
+                    yFour.setCellValue(resultList.get(stock).get(3));
+                }
+            } catch (NullPointerException e1) {
+                yOne.setCellValue("#N/A");
+            }
+            Cell yFive = row.createCell(7);
+            try {
+                if (resultList.get(stock).get(4) == null) {
+                    yFive.setCellValue("#N/A");
+                } else {
+                    yFive.setCellValue(resultList.get(stock).get(4));
+                }
+            } catch (NullPointerException e1) {
+                yOne.setCellValue("#N/A");
+            }
+            Cell resultCell = row.createCell(8);
+            resultCell.setCellValue(finalResultList.get(stock));
+            rowCount += 1;
+        }
     }
 }

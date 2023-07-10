@@ -5,25 +5,41 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PF_REIT_IFF {
 
+    ArrayList<String> PF_REIT_List = new ArrayList<>();
+    ArrayList<String> IFF_List = new ArrayList<>();
+    ArrayList<String> lessOneYear = new ArrayList<>();
+    ArrayList<String> ETF_List = new ArrayList<>();
+
     /**
      * Reads in the data stored in the given Excel file and returns a list of all stocks classed as IFF.
-     *
-     * @return IFF_List, a list of all stocks that are classed as IFF
-     */
-    public ArrayList<String> IFFCollection() throws IOException {
-        ArrayList<String> IFF_List = new ArrayList<>();
-        String excelFilePath = "PF_REIT_IFF.xlsx";
+     **/
+    public void DataCollection() throws IOException {
+        String excelFilePath = "List of stock < 1Y_PF&REIT_IFF-3.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(2);
-        for (int i = 2; i <= sheet.getLastRowNum(); i++) {
-            String stock = sheet.getRow(i).getCell(1).getStringCellValue();
-            IFF_List.add(stock);
+        Sheet sheet = workbook.getSheetAt(0);
+        for (int i = 3; i <= sheet.getLastRowNum(); i++) {
+            String stock;
+            try {
+                stock = sheet.getRow(i).getCell(2).getStringCellValue();
+            } catch (IllegalStateException e1) {
+                stock = "TRUE";
+            }
+            String list = sheet.getRow(i).getCell(3).getStringCellValue();
+            if (Objects.equals(list, "EFTs")){
+                ETF_List.add(stock);
+            } else if (Objects.equals(list, "IFF")){
+                IFF_List.add(stock);
+            } else if (Objects.equals(list, "PF&REIT")){
+                PF_REIT_List.add(stock);
+            } else if (Objects.equals(list, "< 1 year")){
+                lessOneYear.add(stock);
+            }
         }
-        return IFF_List;
     }
 
     /**
@@ -31,40 +47,15 @@ public class PF_REIT_IFF {
      *
      * @return PF_REIT, a list of all stocks that are classed as PF or REIT
      */
-    public ArrayList<String> PF_REITCollection() throws IOException {
-        ArrayList<String> PF_REIT_List = new ArrayList<>();
-        String excelFilePath = "PF_REIT_IFF.xlsx";
-        FileInputStream inputStream = new FileInputStream(excelFilePath);
-        Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(1);
-        for (int i = 2; i <= sheet.getLastRowNum(); i++) {
-            String stock = sheet.getRow(i).getCell(1).getStringCellValue();
-            PF_REIT_List.add(stock);
-        }
+    public ArrayList<String> PF_REIT(){
         return PF_REIT_List;
     }
-
-    /**
-     * Reads in the data stored in the given Excel file and returns a list of all stocks that have been in the market
-     * for less than one year.
-     *
-     * @return lessOneYear, a list of all stocks that have been in the market for less than one year.
-     */
-    public ArrayList<String> lessOneYearCollection() throws IOException {
-        ArrayList<String> lessOneYear = new ArrayList<>();
-        String excelFilePath = "PF_REIT_IFF.xlsx";
-        FileInputStream inputStream = new FileInputStream(excelFilePath);
-        Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(0);
-        for (int i = 2; i <= sheet.getLastRowNum(); i++) {
-            try {
-                String stock = sheet.getRow(i).getCell(1).getStringCellValue();
-                lessOneYear.add(stock);
-            } catch (IllegalStateException e1) {
-                String stock = "TRUE";
-                lessOneYear.add(stock);
-            }
-        }
+    public ArrayList<String> IFF(){
+        return IFF_List;
+    }    public ArrayList<String> EFT(){
+        return ETF_List;
+    }
+    public ArrayList<String> lessOneYear(){
         return lessOneYear;
     }
 }

@@ -1,4 +1,5 @@
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -251,7 +252,7 @@ public class Volatility{
             } else {
                 BigDecimal bdec = closePrice;
                 bdec = bdec.multiply(new BigDecimal(LTV));
-                LTVvals.add(bdec.divide(new BigDecimal(percent), MathContext.DECIMAL32));
+                LTVvals.add(bdec.divide(new BigDecimal(percent), MathContext.DECIMAL64));
             }
         }
         return LTVvals;
@@ -647,5 +648,12 @@ public class Volatility{
             }
         }
         return volatilityPassed;
+    }
+
+    public void getTemplateFile() throws IOException {
+        String excelFilePath = "Result Template of Volatility Test.xlsx";
+        FileInputStream inputStream = new FileInputStream(excelFilePath);
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        Sheet sheet = workbook.getSheetAt(1);
     }
 }

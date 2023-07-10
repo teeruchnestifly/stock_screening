@@ -17,6 +17,12 @@ public class DataClass {
         vol.dataCollection();
         vol.numDaysForward(simulatedTenor);
 
+//        fundamental.dataCollectionNetProfit();
+//        fundamental.dataCollectionICR();
+//        ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
+//        ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
+//        fundamental.getTemplateFile();
+
 //      Call for LTV60 Simulation
         vol.LTVVal(0.6);
         vol.count();
@@ -71,6 +77,10 @@ public class DataClass {
             stockFSPortion.put(stock, 0.5833);
             stockMaxLTV.put(stock, 0.4);
         }
+        for (String stock : vol.volatilityFailed()){
+            stockFSPortion.put(stock, 0.5);
+            stockMaxLTV.put(stock, 99.9);
+        }
 
 
         System.out.println();
@@ -105,6 +115,8 @@ public class DataClass {
         System.out.println(MAX40Liq.size());
         System.out.println();
 
+        liq.getTemplateFile();
+
 
         fundamental.dataCollectionNetProfit();
         fundamental.dataCollectionICR();
@@ -138,30 +150,31 @@ public class DataClass {
         System.out.println(MAX40fund.size());
 
         PF_REIT_IFF pf = new PF_REIT_IFF();
+        pf.DataCollection();
         ArrayList<String> MAX60 = new ArrayList<>();
         ArrayList<String> MAX50 = new ArrayList<>();
         ArrayList<String> MAX40 = new ArrayList<>();
         ArrayList<String> removedStocks = new ArrayList<>();
 
         for (String stock : MAX60fund) {
-            if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
-                    !(pf.IFFCollection().contains(stock))) {
+            if ((!pf.IFF().contains(stock)) & !(pf.PF_REIT().contains(stock)) &
+                    !(pf.lessOneYear().contains(stock)) & !(pf.EFT().contains(stock))) {
                 MAX60.add(stock);
             } else {
                 removedStocks.add(stock);
             }
         }
         for (String stock : MAX50fund) {
-            if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
-                    !(pf.IFFCollection().contains(stock))) {
+            if ((!pf.IFF().contains(stock)) & !(pf.PF_REIT().contains(stock)) &
+                    !(pf.lessOneYear().contains(stock)) & !(pf.EFT().contains(stock))) {
                 MAX50.add(stock);
             } else {
                 removedStocks.add(stock);
             }
         }
         for (String stock : MAX40fund) {
-            if ((!pf.lessOneYearCollection().contains(stock)) & !(pf.PF_REITCollection().contains(stock)) &
-                    !(pf.IFFCollection().contains(stock))) {
+            if ((!pf.IFF().contains(stock)) & !(pf.PF_REIT().contains(stock)) &
+                    !(pf.lessOneYear().contains(stock)) & !(pf.EFT().contains(stock))) {
                 MAX40.add(stock);
             } else {
                 removedStocks.add(stock);
