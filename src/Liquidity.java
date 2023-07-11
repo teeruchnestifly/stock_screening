@@ -381,7 +381,7 @@ public class Liquidity {
 //        LocalDateTime ldt = LocalDateTime.now();
 //        String time = ldt.format(CUSTOM_FORMATTER);
 //        String newFileName = "Fundamental_Test_Result_" + time + ".xls";
-        FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result.xls");
+        FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result_May2023.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
@@ -450,6 +450,40 @@ public class Liquidity {
     }
 
     public void calcSummary(Sheet summary){
-
+        int rowCount = 2;
+        for (String stock : stockTotalValue.keySet()) {
+            Row row = summary.createRow(rowCount);
+            Cell numStock = row.createCell(0);
+            numStock.setCellValue(rowCount - 1);
+            Cell stockCell = row.createCell(1);
+            stockCell.setCellValue(stock);
+            Cell marketCell = row.createCell(4);
+            marketCell.setCellValue(stockMarket.get(stock));
+            Cell FS = row.createCell(3);
+            FS.setCellValue(stockFsPortion.get(stock).doubleValue());
+            Cell MaxLtv = row.createCell(2);
+            if ((Objects.equals(stockMaxLTv.get(stock), BigDecimal.valueOf(99.9)))){
+                MaxLtv.setCellValue("Fail");
+            } else {
+                MaxLtv.setCellValue(stockMaxLTv.get(stock).doubleValue());
+            }
+            Cell maxCP = row.createCell(5);
+            try {
+                maxCP.setCellValue(stockMaxCP.get(stock).doubleValue());
+            } catch (NullPointerException e1) {
+                maxCP.setCellValue("#N/A");
+            }
+            Cell maxCPMCRatio = row.createCell(6);
+            try {
+                maxCPMCRatio.setCellValue(stockMaxCPRatio.get(stock).doubleValue() * 100);
+            } catch (NullPointerException e1) {
+                maxCPMCRatio.setCellValue("#N/A");
+            }
+            Cell result = row.createCell(7);
+            result.setCellValue(stockFinalResults.get(stock));
+            rowCount++;
+        }
+//        Cell date = summary.getRow(0).getCell(1);
+//        date.setCellValue(dates.get(dates.size()-1));
     }
 }

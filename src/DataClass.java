@@ -17,12 +17,6 @@ public class DataClass {
         vol.dataCollection();
         vol.numDaysForward(simulatedTenor);
 
-//        fundamental.dataCollectionNetProfit();
-//        fundamental.dataCollectionICR();
-//        ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
-//        ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
-//        fundamental.getTemplateFile();
-
 //      Call for LTV60 Simulation
         vol.LTVVal(0.6);
         vol.count();
@@ -60,6 +54,8 @@ public class DataClass {
         }
         System.out.println("Stocks classed as SET40: " + SET40);
         System.out.println(SET40.size());
+
+        vol.getTemplateFile();
 
 //      Displays failed stocks
         System.out.println("Stocks that failed all tests: " + vol.volatilityFailed());
@@ -122,7 +118,7 @@ public class DataClass {
         fundamental.dataCollectionICR();
         ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
         ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
-
+        fundamental.getTemplateFile();
         System.out.println("Result of Fundamental test");
         System.out.println();
         System.out.println("Stocks that passed fundamental test: " + fundamentalPassed);
