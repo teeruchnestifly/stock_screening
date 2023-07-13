@@ -178,7 +178,7 @@ public class Volatility{
      * storing every date from the Excel file
      */
     public void dataCollection() throws IOException {
-        String excelFilePath = "rawData.xlsx";
+        String excelFilePath = "Volatility_Data_June.xlsx"; /** CHANGE TO NAME OF VOLATILITY DATA FILE FOR CURRENT TEST **/
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
@@ -800,6 +800,7 @@ public class Volatility{
         return volatilityPassed;
     }
 
+
     /**
      * A function that will read in the volatility result template and write and output a new file.
      *
@@ -812,7 +813,6 @@ public class Volatility{
     public void writeVolatilityResult() throws IOException {
         String excelFilePath = "Result Template of Volatility Test.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
-//        Workbook workbook = new XSSFWorkbook(inputStream);
         XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         CellStyle cellStyle = workbook.createCellStyle();
         CreationHelper createHelper = workbook.getCreationHelper();
@@ -836,7 +836,7 @@ public class Volatility{
         calcResult(Result40, prob75M40, prob100M40, difference75to100M40, dates, cellStyle);
         Sheet summary = workbook.getSheetAt(0);
         calcSummary(summary);
-        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_3.xls");
+        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_June.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
@@ -857,17 +857,31 @@ public class Volatility{
                 MAX40.add(stock);
             }
         }
-        System.out.println(MAX40);
         for (String stock : stockClosingPrices.keySet()) {
             if (!MAX50.contains(stock) && !pass60.contains(stock) && !MAX40.contains(stock)) {
                 failed.add(stock);
             }
         }
     }
+    public ArrayList<String> getResult60(){
+        return pass60;
+    }
+    public ArrayList<String> getResult50(){
+        return MAX50;
+    }
+    public ArrayList<String> getResult40(){
+        return MAX40;
+    }
+
+    public ArrayList<String> getResultFailed(){
+        return failed;
+    }
+
 
     /**
      * A helper function that updates the summary sheet of the volatility result file.
      */
+
     public void calcSummary(Sheet summary){
         summaryHelper();
         int rowCount = 1;
@@ -939,6 +953,7 @@ public class Volatility{
         Heading5.setCellValue("Total");
     }
 
+
     /**
      * A helper function that updates the result sheets of the volatility result file.
      */
@@ -1004,6 +1019,7 @@ public class Volatility{
             colCount++;
         }
     }
+
 
     /**
      * A helper function that updates the analysis sheets of the volatility result file.

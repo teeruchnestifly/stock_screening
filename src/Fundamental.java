@@ -33,7 +33,7 @@ public class Fundamental {
      * Updates the stockNetProfit hashmap, storing the profit for every stock.
      */
     public void dataCollectionNetProfit() throws IOException {
-        String excelFilePath = "2022 Net Profit.xlsx";
+        String excelFilePath = "2022 Net Profit.xlsx"; /** CHANGE TO NAME OF MOST RECENT PROFIT DATA FILE FOR CURRENT TEST **/
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
@@ -46,10 +46,10 @@ public class Fundamental {
             Double profit = sheet.getRow(r).getCell(4).getNumericCellValue();
             stockNetProfit.get(stock).add(profit);
         }
-        dataCollectionHelper("2021 Net Profit.xlsx", stockNetProfit);
-        dataCollectionHelper("2020 Net Profit.xlsx", stockNetProfit);
-        dataCollectionHelper("2019 Net Profit.xlsx", stockNetProfit);
-        dataCollectionHelper("2018 Net Profit.xlsx", stockNetProfit);
+        dataCollectionHelper("2021 Net Profit.xlsx", stockNetProfit); /** CHANGE TO NAME OF PROFIT DATA FILE FOR CURRENT TEST IN DESCENDING ORDER**/
+        dataCollectionHelper("2020 Net Profit.xlsx", stockNetProfit); /** CHANGE NAME **/
+        dataCollectionHelper("2019 Net Profit.xlsx", stockNetProfit); /** CHANGE NAME **/
+        dataCollectionHelper("2018 Net Profit.xlsx", stockNetProfit); /** CHANGE NAME **/
         for (String stock : stockNetProfit.keySet()) {
             if (stockNetProfit.get(stock).size() != 5) {
                 for (int i = stockNetProfit.get(stock).size(); i < 5; i++) {
@@ -67,7 +67,7 @@ public class Fundamental {
      * Updates the stockICR hashmap, storing the ICR for every stock.
      */
     public void dataCollectionICR() throws IOException {
-        String excelFilePath = "2022 ICR.xlsx";
+        String excelFilePath = "2022 ICR.xlsx"; /** CHANGE TO NAME OF MOST RECENT ICR DATA FILE FOR CURRENT TEST **/
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(0);
@@ -78,10 +78,10 @@ public class Fundamental {
             Double icr = sheet.getRow(r).getCell(4).getNumericCellValue();
             stockICR.get(stock).add(icr);
         }
-        dataCollectionHelper("2021 ICR.xlsx", stockICR);
-        dataCollectionHelper("2020 ICR.xlsx", stockICR);
-        dataCollectionHelper("2019 ICR.xlsx", stockICR);
-        dataCollectionHelper("2018 ICR.xlsx", stockICR);
+        dataCollectionHelper("2021 ICR.xlsx", stockICR); /** CHANGE TO NAME OF ICR DATA FILE FOR CURRENT TEST IN DESCENDING ORDER**/
+        dataCollectionHelper("2020 ICR.xlsx", stockICR); /** CHANGE NAME **/
+        dataCollectionHelper("2019 ICR.xlsx", stockICR); /** CHANGE NAME **/
+        dataCollectionHelper("2018 ICR.xlsx", stockICR); /** CHANGE NAME **/
         for (String stock : stockICR.keySet()) {
             if (stockICR.get(stock).size() != 5) {
                 for (int i = stockICR.get(stock).size(); i < 5; i++) {
@@ -242,7 +242,7 @@ public class Fundamental {
         Sheet Summary = workbook.getSheetAt(0);
         helperSummary(Summary);
         inputStream.close();
-        FileOutputStream outputStream = new FileOutputStream("Fundamental_Test_Result_May2023.xls");
+        FileOutputStream outputStream = new FileOutputStream("Fundamental_Test_Result_June.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();

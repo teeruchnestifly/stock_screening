@@ -72,7 +72,7 @@ public class Liquidity {
      * market cap for each day in the last year and the dates arraylist,storing every trading day in the year.
      */
     public void dataCollection() throws IOException {
-        String excelFilePath = "Liquidity Test.xlsx";
+        String excelFilePath = "Liquidity_File_June.xlsx"; /** CHANGE TO NAME OF LIQUIDITY DATA FILE FOR CURRENT TEST **/
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(2);
@@ -85,15 +85,19 @@ public class Liquidity {
         for (int r = sheet.getLastRowNum(); r > 1; r--) {
             String stock;
             try {
+                //DATA FOR STOCK SYMBOL CURRENTLY AT COLUMN 3, MUST BE CHANGED IF INPUT FILE FORMAT CHANGED
                 stock = sheet.getRow(r).getCell(3).getStringCellValue();
             } catch (IllegalStateException e1) {
                 stock = "TRUE";
             }
+            //DATA FOR STOCK SYMBOL CURRENTLY AT COLUMN 2, MUST BE CHANGED IF INPUT FILE FORMAT CHANGED
             String market = sheet.getRow(r).getCell(2).getStringCellValue();
             stockMarket.put(stock, market);
+            //DATA FOR TOTAL VALUE CURRENTLY AT COLUMN 17, MUST BE CHANGED IF INPUT FILE FORMAT CHANGED
             helper(stock, BigDecimal.valueOf(sheet.getRow(r).getCell(17).getNumericCellValue()), stockTotalValue);
             BigDecimal marketCap;
             try {
+                //DATA FOR MARKET CAP CURRENTLY AT COLUMN 18, MUST BE CHANGED IF INPUT FILE FORMAT CHANGED
                 marketCap = BigDecimal.valueOf(sheet.getRow(r).getCell(18).getNumericCellValue());
             } catch (NullPointerException e2) {
                 marketCap = null;
@@ -398,7 +402,7 @@ public class Liquidity {
         Sheet summary = workbook.getSheetAt(0);
         calcSummary(summary, style, rounding);
         inputStream.close();
-        FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result_May2023.xls");
+        FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result_June.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();

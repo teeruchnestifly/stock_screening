@@ -18,7 +18,7 @@ public class PF_REIT_IFF {
      * Reads in the data stored in the given Excel file and returns a list of all stocks classed as IFF.
      **/
     public void DataCollection() throws IOException {
-        String excelFilePath = "List of stock < 1Y_PF&REIT_IFF-3.xlsx";
+        String excelFilePath = "Exclusion_List_June.xlsx"; /** CHANGE TO NAME OF MOST RECENT DATA FILE FOR CURRENT TEST **/
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet sheet = workbook.getSheetAt(0);

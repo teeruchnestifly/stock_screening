@@ -29,6 +29,11 @@ public class DataClass {
     static HashMap<String, BigDecimal> maxCPRatio = new HashMap<>();
     static HashMap<String, String> profit = new HashMap<>();
     static HashMap<String, String> icr = new HashMap<>();
+    static ArrayList<String> resultVol60 = new ArrayList<>();
+    static ArrayList<String> resultVol50 = new ArrayList<>();
+    static ArrayList<String> resultVol40 = new ArrayList<>();
+    static ArrayList<String> resultVolFailed = new ArrayList<>();
+
 
 
     public static void main(String[] args) throws IOException {
@@ -71,6 +76,11 @@ public class DataClass {
         max40 = SET40;
         failedVol = vol.volatilityFailed();
         vol.writeVolatilityResult();
+        resultVol60 = vol.getResult60();
+        resultVol50 = vol.getResult50();
+        resultVol40 = vol.getResult40();
+        resultVolFailed = vol.getResultFailed();
+
 
         // Addition of information for liquidity test
         for (String stock : SET60) {
@@ -205,11 +215,11 @@ public class DataClass {
             Cell stockCell = row.createCell(2);
             stockCell.setCellValue(stock);
             Cell NTF = row.createCell(3);
-            if (max60.contains(stock)) {
+            if (resultVol60.contains(stock)) {
                 NTF.setCellValue("MAX 60");
-            } else if ((max50.contains(stock))) {
+            } else if ((resultVol50.contains(stock))) {
                 NTF.setCellValue("MAX 50");
-            } else if ((max40.contains(stock))) {
+            } else if ((resultVol40.contains(stock))) {
                 NTF.setCellValue("MAX 40");
             } else {
                 NTF.setCellValue("Fail");
@@ -304,7 +314,7 @@ public class DataClass {
             }
             rowCount++;
         }
-        FileOutputStream outputStream = new FileOutputStream("Summary_Result.xls");
+        FileOutputStream outputStream = new FileOutputStream("Summary_Result_June_1.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
