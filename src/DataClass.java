@@ -1,4 +1,10 @@
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -8,6 +14,22 @@ public class DataClass {
     public static HashMap<String, Double> stockFSPortion = new HashMap<>();
     public static HashMap<String, Double> stockMaxLTV = new HashMap<>();
     public static Integer simulatedTenor = 9;
+    static ArrayList<String> total = new ArrayList<>();
+    static ArrayList<String> max60 = new ArrayList<>();
+    static ArrayList<String> max50 = new ArrayList<>();
+    static ArrayList<String> max40 = new ArrayList<>();
+    static ArrayList<String> failedVol = new ArrayList<>();
+    static ArrayList<String> failedLiq = new ArrayList<>();
+    static ArrayList<String> failedFund = new ArrayList<>();
+    static ArrayList<String> removedStocks = new ArrayList<>();
+    static ArrayList<String> finalResult60 = new ArrayList<>();
+    static ArrayList<String> finalResult50 = new ArrayList<>();
+    static ArrayList<String> finalResult40 = new ArrayList<>();
+    static HashMap<String, BigDecimal> maxCP = new HashMap<>();
+    static HashMap<String, BigDecimal> maxCPRatio = new HashMap<>();
+    static HashMap<String, String> profit = new HashMap<>();
+    static HashMap<String, String> icr = new HashMap<>();
+
 
     public static void main(String[] args) throws IOException {
 
@@ -22,11 +44,7 @@ public class DataClass {
         vol.count();
         vol.probability();
         ArrayList<String> SET60 = vol.volatilityPassed();
-        System.out.println("Volatility Test Results");
-        System.out.println();
-
-        System.out.println("Stocks classed as SET60: " + SET60);
-        System.out.println(SET60.size());
+        max60 = SET60;
 
 //      Call for LTV50 Simulation
         vol.LTVVal(0.5);
@@ -38,58 +56,52 @@ public class DataClass {
                 SET50.add(stock);
             }
         }
-        System.out.println("Stocks classed as SET50: " + SET50);
-        System.out.println(SET50.size());
+        max50 = SET50;
 
         //Call for LTV40 Simulation
         vol.LTVVal(0.4);
         vol.count();
         vol.probability();
-        vol.volatilityPassed();
         ArrayList<String> SET40 = new ArrayList<>();
         for (String stock : vol.volatilityPassed()) {
             if (!SET50.contains(stock) && !SET60.contains(stock)) {
                 SET40.add(stock);
             }
         }
-        System.out.println("Stocks classed as SET40: " + SET40);
-        System.out.println(SET40.size());
+        max40 = SET40;
+        failedVol = vol.volatilityFailed();
+        vol.writeVolatilityResult();
 
-        vol.getTemplateFile();
-
-//      Displays failed stocks
-        System.out.println("Stocks that failed all tests: " + vol.volatilityFailed());
-        System.out.println(vol.volatilityFailed().size());
-
+        // Addition of information for liquidity test
         for (String stock : SET60) {
             stockFSPortion.put(stock, 0.375);
             stockMaxLTV.put(stock, 0.6);
+            total.add(stock);
         }
         for (String stock : SET50) {
             stockFSPortion.put(stock, 0.5);
             stockMaxLTV.put(stock, 0.5);
+            total.add(stock);
         }
         for (String stock : SET40) {
             stockFSPortion.put(stock, 0.5833);
             stockMaxLTV.put(stock, 0.4);
+            total.add(stock);
         }
-        for (String stock : vol.volatilityFailed()){
+        for (String stock : vol.volatilityFailed()) {
             stockFSPortion.put(stock, 0.5);
             stockMaxLTV.put(stock, 99.9);
+            total.add(stock);
         }
 
-
-        System.out.println();
-        System.out.println("Result of Liquidity test");
-        System.out.println();
+        // Call for liquidity test
         liq.dataCollection();
         liq.calcAverages();
-        ArrayList<String> liquidityPassed = liq.liqPassed(stockFSPortion, stockMaxLTV);
+        liq.liqPassed(stockFSPortion, stockMaxLTV);
         ArrayList<String> liquidityFailed = liq.liqFailed(stockFSPortion, stockMaxLTV);
+        failedLiq = liquidityFailed;
 
-        System.out.println("Stocks that passed liquidity test: " + liquidityPassed);
-        System.out.println("Stocks that failed liquidity test: " + liquidityFailed);
-
+        //Removal of failed liquidity stocks
         ArrayList<String> MAX60Liq = SET60;
         for (String value : liquidityFailed) {
             MAX60Liq.remove(value);
@@ -102,29 +114,18 @@ public class DataClass {
         for (String s : liquidityFailed) {
             MAX40Liq.remove(s);
         }
-        System.out.println();
-        System.out.println("SET60: " + MAX60Liq);
-        System.out.println(MAX60Liq.size());
-        System.out.println("SET50: " + MAX50Liq);
-        System.out.println(MAX50Liq.size());
-        System.out.println("SET40: " + MAX40Liq);
-        System.out.println(MAX40Liq.size());
-        System.out.println();
-
-        liq.getTemplateFile();
+        liq.writeLiquidityResult();
 
 
+        //Call for fundamental stocks
         fundamental.dataCollectionNetProfit();
         fundamental.dataCollectionICR();
-        ArrayList<String> fundamentalPassed = fundamental.fundamentalPassed();
+        fundamental.fundamentalPassed();
         ArrayList<String> fundamentalFailed = fundamental.fundamentalFailed();
-        fundamental.getTemplateFile();
-        System.out.println("Result of Fundamental test");
-        System.out.println();
-        System.out.println("Stocks that passed fundamental test: " + fundamentalPassed);
-        System.out.println("Stocks that failed fundamental test: " + fundamentalFailed);
-        System.out.println();
+        failedFund = fundamentalFailed;
+        fundamental.writeFundamentalResult();
 
+        //Removal of failed fundamental stocks
         ArrayList<String> MAX60fund = MAX60Liq;
         for (String s : fundamentalFailed) {
             MAX60fund.remove(s);
@@ -138,24 +139,15 @@ public class DataClass {
             MAX40fund.remove(s);
         }
 
-        System.out.println("SET60: " + MAX60fund);
-        System.out.println(MAX60fund.size());
-        System.out.println("SET50: " + MAX50fund);
-        System.out.println(MAX50fund.size());
-        System.out.println("SET40: " + MAX40fund);
-        System.out.println(MAX40fund.size());
-
+        //Call for exclusion list stocks
         PF_REIT_IFF pf = new PF_REIT_IFF();
         pf.DataCollection();
-        ArrayList<String> MAX60 = new ArrayList<>();
-        ArrayList<String> MAX50 = new ArrayList<>();
-        ArrayList<String> MAX40 = new ArrayList<>();
-        ArrayList<String> removedStocks = new ArrayList<>();
 
+        //Removal of failed exclusion list stocks
         for (String stock : MAX60fund) {
             if ((!pf.IFF().contains(stock)) & !(pf.PF_REIT().contains(stock)) &
                     !(pf.lessOneYear().contains(stock)) & !(pf.EFT().contains(stock))) {
-                MAX60.add(stock);
+                finalResult60.add(stock);
             } else {
                 removedStocks.add(stock);
             }
@@ -163,7 +155,7 @@ public class DataClass {
         for (String stock : MAX50fund) {
             if ((!pf.IFF().contains(stock)) & !(pf.PF_REIT().contains(stock)) &
                     !(pf.lessOneYear().contains(stock)) & !(pf.EFT().contains(stock))) {
-                MAX50.add(stock);
+                finalResult50.add(stock);
             } else {
                 removedStocks.add(stock);
             }
@@ -171,22 +163,150 @@ public class DataClass {
         for (String stock : MAX40fund) {
             if ((!pf.IFF().contains(stock)) & !(pf.PF_REIT().contains(stock)) &
                     !(pf.lessOneYear().contains(stock)) & !(pf.EFT().contains(stock))) {
-                MAX40.add(stock);
+                finalResult40.add(stock);
             } else {
                 removedStocks.add(stock);
             }
         }
-        System.out.println();
-        System.out.println("Removal of stocks which are PF&REIT / IFF / <1y");
-        System.out.println();
 
-        System.out.println("Stocks classed as MAX60: " + MAX60);
-        System.out.println(MAX60.size());
-        System.out.println("Stocks classed as MAX50: " + MAX50);
-        System.out.println(MAX50.size());
-        System.out.println("Stocks classed as MAX40: " + MAX40);
-        System.out.println(MAX40.size());
-        System.out.println("Stocks removed: " + removedStocks);
-        System.out.println(removedStocks.size());
+        //Call for final summary
+        maxCP = liq.returnMCP();
+        maxCPRatio = liq.returnMCPratio();
+        profit = fundamental.getStockProfitResults();
+        icr = fundamental.getStockICRResults();
+        DataClass dc = new DataClass();
+        dc.writeFinalSummary();
+    }
+
+
+    /**
+     * A function that will read in the summary template and write and output a new file.
+     *
+     * Outputs an updated file containing a summary of the data across all tests.
+     */
+    public void writeFinalSummary() throws IOException {
+        PF_REIT_IFF pf = new PF_REIT_IFF();
+        pf.DataCollection();
+        Liquidity liq = new Liquidity();
+        liq.dataCollection();
+        String excelFilePath = "Result Template of Summary Stocklist.xlsx";
+        FileInputStream inputStream = new FileInputStream(excelFilePath);
+        Workbook workbook = new XSSFWorkbook(inputStream);
+        CellStyle style = workbook.createCellStyle();
+        style.setDataFormat(workbook.createDataFormat().getFormat("0.000%"));
+        Sheet summary = workbook.getSheetAt(0);
+        int rowCount = 2;
+        for (String stock : total) {
+            Row row = summary.createRow(rowCount);
+            Cell numStock = row.createCell(0);
+            numStock.setCellValue(rowCount - 1);
+            Cell stockMarket = row.createCell(1);
+            stockMarket.setCellValue(liq.getStockMarket().get(stock));
+            Cell stockCell = row.createCell(2);
+            stockCell.setCellValue(stock);
+            Cell NTF = row.createCell(3);
+            if (max60.contains(stock)) {
+                NTF.setCellValue("MAX 60");
+            } else if ((max50.contains(stock))) {
+                NTF.setCellValue("MAX 50");
+            } else if ((max40.contains(stock))) {
+                NTF.setCellValue("MAX 40");
+            } else {
+                NTF.setCellValue("Fail");
+            }
+            Cell volResult = row.createCell(4);
+            if (failedVol.contains(stock)) {
+                volResult.setCellValue("Fail");
+            } else {
+                volResult.setCellValue("Pass");
+            }
+            Cell liqResult = row.createCell(5);
+            if (failedLiq.contains(stock)) {
+                liqResult.setCellValue("Fail");
+            } else {
+                liqResult.setCellValue("Pass");
+            }
+            Cell MCP = row.createCell(6);
+            try {
+                MCP.setCellValue(maxCP.get(stock).doubleValue());
+            } catch (NullPointerException e1) {
+                MCP.setCellValue("N/A");
+            }
+            Cell MCPratio = row.createCell(7);
+            try {
+                MCPratio.setCellValue(maxCPRatio.get(stock).doubleValue());
+                MCPratio.setCellStyle(style);
+            } catch (NullPointerException e1) {
+                MCPratio.setCellValue("N/A");
+            }
+            Cell fundResult = row.createCell(8);
+            if (failedFund.contains(stock)) {
+                fundResult.setCellValue("Fail");
+            } else {
+                fundResult.setCellValue("Pass");
+            }
+            Cell netProfit = row.createCell(9);
+            try {
+                if (profit.get(stock) == null){
+                    netProfit.setCellValue("N/A");
+                } else {
+                    netProfit.setCellValue(profit.get(stock));
+                }
+            } catch (NullPointerException e1) {
+                netProfit.setCellValue("N/A");
+            }
+            Cell ICR = row.createCell(10);
+            try {
+                if (icr.get(stock) == null){
+                    ICR.setCellValue("N/A");
+                } else {
+                    ICR.setCellValue(icr.get(stock));
+                }
+            } catch (NullPointerException e1) {
+                ICR.setCellValue("N/A");
+            }
+            Cell exclusionList = row.createCell(11);
+            if (pf.lessOneYear().contains(stock) || pf.PF_REIT().contains(stock) || pf.IFF().contains(stock) ||
+                    pf.EFT().contains(stock)) {
+                exclusionList.setCellValue("Fail");
+            } else {
+                exclusionList.setCellValue("Pass");
+            }
+            Cell lessOneYear = row.createCell(12);
+            if (pf.lessOneYear().contains(stock)) {
+                lessOneYear.setCellValue("YES");
+            } else {
+                lessOneYear.setCellValue("NO");
+            }
+            Cell PfReit = row.createCell(13);
+            if (pf.PF_REIT().contains(stock)) {
+                PfReit.setCellValue("YES");
+            } else {
+                PfReit.setCellValue("NO");
+            }
+            Cell IFF = row.createCell(14);
+            if (pf.IFF().contains(stock)) {
+                IFF.setCellValue("YES");
+            } else {
+                IFF.setCellValue("NO");
+            }
+            Cell ETF = row.createCell(15);
+            if (pf.EFT().contains(stock)) {
+                ETF.setCellValue("YES");
+            } else {
+                ETF.setCellValue("NO");
+            }
+            Cell allTestResult = row.createCell(16);
+            if (finalResult60.contains(stock) || finalResult50.contains(stock) || finalResult40.contains(stock)) {
+                allTestResult.setCellValue("Pass");
+            } else {
+                allTestResult.setCellValue("Fail");
+            }
+            rowCount++;
+        }
+        FileOutputStream outputStream = new FileOutputStream("Summary_Result.xls");
+        workbook.write(outputStream);
+        workbook.close();
+        outputStream.close();
     }
 }

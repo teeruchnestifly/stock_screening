@@ -50,11 +50,31 @@ public class PF_REIT_IFF {
     public ArrayList<String> PF_REIT(){
         return PF_REIT_List;
     }
+
+    /**
+     * Reads in the data stored in the given Excel file and returns a list of all stocks classed as IFF.
+     *
+     * @return IFF_List, a list of all stocks that are classed as IFF
+     */
     public ArrayList<String> IFF(){
         return IFF_List;
-    }    public ArrayList<String> EFT(){
+    }
+
+    /**
+     * Reads in the data stored in the given Excel file and returns a list of all stocks classed as EFT
+     *
+     * @return ETF_List, a list of all stocks that are classed as EFT
+     */
+    public ArrayList<String> EFT(){
         return ETF_List;
     }
+
+    /**
+     * Reads in the data stored in the given Excel file and returns a list of all stocks that have been in the market
+     * for less than one year.
+     *
+     * @return lessOneYear, a list of all stocks that have been in the market for less than one year.
+     */
     public ArrayList<String> lessOneYear(){
         return lessOneYear;
     }

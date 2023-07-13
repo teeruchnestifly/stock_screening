@@ -6,15 +6,10 @@ import java.math.MathContext;
 import java.time.*;
 import java.util.*;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.util.SystemOutLogger;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class Liquidity {
 
-    /**
-     * A list containing all the stocks in the Excel file.
-     */
-    private final ArrayList<String> stockList = new ArrayList<>();
     /**
      * A hashmap mapping all stocks to an arraylist containing their total value for each day in the last year.
      */
@@ -42,14 +37,11 @@ public class Liquidity {
     /**
      * A hashmap mapping all stocks to a big decimal representing their max loan to market cap ratio.
      */
-    private final HashMap<String, BigDecimal> stockMaxLoandivMC = new HashMap<>();
     private final HashMap<String, BigDecimal> stockFsPortion = new HashMap<>();
     private final HashMap<String, BigDecimal> stockMaxLTv = new HashMap<>();
     private final HashMap<String, String> stockMarket = new HashMap<>();
     private final HashMap<String, String> stockFinalResults = new HashMap<>();
     private final HashMap<String, BigDecimal> stockAvgVal = new HashMap<>();
-
-
 
     /**
      * A list containing all trading days in the last year.
@@ -290,18 +282,18 @@ public class Liquidity {
                 .divide(stockFS, MathContext.DECIMAL64);
         stockMaxCP.put(stock, maxCP);
         stockMaxLoan.put(stock, maxCP.multiply(stockMaxLtv));
-        if (stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1) == null ||
-                stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1).equals(BigDecimal.valueOf(0)) ||
-                stockMaxCP.get(stock) == null || stockMaxCP.get(stock).equals(BigDecimal.valueOf(0))) {
-            stockMaxLoandivMC.put(stock, null);
-        } else {
-            try {
-                stockMaxLoandivMC.put(stock, maxCP.multiply(stockMaxLtv).
-                        divide(stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1), MathContext.DECIMAL64));
-            } catch (ArithmeticException divUndefined) {
-                stockMaxLoandivMC.put(stock, null);
-            }
-        }
+//        if (stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1) == null ||
+//                stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1).equals(BigDecimal.valueOf(0)) ||
+//                stockMaxCP.get(stock) == null || stockMaxCP.get(stock).equals(BigDecimal.valueOf(0))) {
+//            stockMaxLoandivMC.put(stock, null);
+//        } else {
+//            try {
+//                stockMaxLoandivMC.put(stock, maxCP.multiply(stockMaxLtv).
+//                        divide(stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1), MathContext.DECIMAL64));
+//            } catch (ArithmeticException divUndefined) {
+//                stockMaxLoandivMC.put(stock, null);
+//            }
+//        }
         return maxCP;
     }
 
@@ -369,25 +361,53 @@ public class Liquidity {
         return liquidityFailed;
     }
 
-    public void getTemplateFile() throws IOException {
+    /**
+     * A function that returns the stockMaxCP hashmap to be used in the writing of the summary file.
+     */
+    public HashMap<String, BigDecimal> returnMCP(){
+        return stockMaxCP;
+    }
+    /**
+     * A function that returns the stockMaxCPRatio hashmap to be used in the writing of the summary file.
+     */
+    public HashMap<String, BigDecimal> returnMCPratio(){
+        return stockMaxCPRatio;
+    }
+    /**
+     * A function that returns the stockMarket hashmap to be used in the writing of the summary file.
+     */
+    public HashMap<String, String> getStockMarket(){
+        return stockMarket;
+    }
+
+    /**
+     * A function that will read in the liquidity result template and write and output a new file.
+     *
+     * Outputs an updated file containing the data used in the liquidity test.
+     */
+    public void writeLiquidityResult() throws IOException {
         String excelFilePath = "Result Template of Liquidity Test.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
         Sheet calculation = workbook.getSheetAt(1);
-        calcCalculation(calculation);
+        CellStyle style = workbook.createCellStyle();
+        style.setDataFormat(workbook.createDataFormat().getFormat("0.000%"));
+        CellStyle rounding = workbook.createCellStyle();
+        rounding.setDataFormat(workbook.createDataFormat().getFormat("0.00"));
+        calcCalculation(calculation, style, rounding);
         Sheet summary = workbook.getSheetAt(0);
-        calcSummary(summary);
+        calcSummary(summary, style, rounding);
         inputStream.close();
-//        LocalDateTime ldt = LocalDateTime.now();
-//        String time = ldt.format(CUSTOM_FORMATTER);
-//        String newFileName = "Fundamental_Test_Result_" + time + ".xls";
         FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result_May2023.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
     }
 
-    public void calcCalculation(Sheet calculation){
+    /**
+     * A helper function that updates the calculation sheet of the liquidity result file.
+     */
+    public void calcCalculation(Sheet calculation, CellStyle style, CellStyle rounding){
         int rowCount = 1;
         for (String stock : stockTotalValue.keySet()) {
             Row row = calculation.createRow(rowCount);
@@ -399,49 +419,57 @@ public class Liquidity {
             marketCell.setCellValue(stockMarket.get(stock));
             Cell FS = row.createCell(3);
             FS.setCellValue(stockFsPortion.get(stock).doubleValue());
+            FS.setCellStyle(style);
             Cell MaxLtv = row.createCell(2);
             if ((Objects.equals(stockMaxLTv.get(stock), BigDecimal.valueOf(99.9)))){
                 MaxLtv.setCellValue("Fail");
             } else {
                 MaxLtv.setCellValue(stockMaxLTv.get(stock).doubleValue());
+                MaxLtv.setCellStyle(style);
             }
             for (int i=0; i < stockTotalValueAveraged.get(stock).size(); i++){
                 Cell avgVal = row.createCell(i + 5);
                 try {
                     avgVal.setCellValue(stockTotalValueAveraged.get(stock).get(i).doubleValue());
+                    avgVal.setCellStyle(rounding);
                 } catch (NullPointerException e1) {
-                    avgVal.setCellValue("#N/A");
+                    avgVal.setCellValue("XXX");
                 }
             }
             Cell yearAvg = row.createCell(17);
             try {
                 yearAvg.setCellValue(stockAvgVal.get(stock).doubleValue());
+                yearAvg.setCellStyle(rounding);
             } catch (NullPointerException e1) {
-                yearAvg.setCellValue("N/A");
+                yearAvg.setCellValue("XXX");
             }
             Cell marketCap = row.createCell(18);
             try {
                 marketCap.setCellValue(stockMarketCap.get(stock).get(stockMarketCap.get(stock).size() - 1).doubleValue());
+                marketCap.setCellStyle(rounding);
             } catch (NullPointerException e1) {
-                marketCap.setCellValue("#N/A");
+                marketCap.setCellValue("XXX");
             }
             Cell maxCP = row.createCell(19);
             try {
                 maxCP.setCellValue(stockMaxCP.get(stock).doubleValue());
+                maxCP.setCellStyle(rounding);
             } catch (NullPointerException e1) {
-                maxCP.setCellValue("#N/A");
+                maxCP.setCellValue("XXX");
             }
             Cell maxCPMCRatio = row.createCell(20);
             try {
-                maxCPMCRatio.setCellValue(stockMaxCPRatio.get(stock).doubleValue() * 100);
+                maxCPMCRatio.setCellValue(stockMaxCPRatio.get(stock).doubleValue());
+                maxCPMCRatio.setCellStyle(style);
             } catch (NullPointerException e1) {
-                maxCPMCRatio.setCellValue("#N/A");
+                maxCPMCRatio.setCellValue("XXX");
             }
             Cell maxLoan = row.createCell(21);
             try {
                 maxLoan.setCellValue(stockMaxLoan.get(stock).doubleValue());
+                maxLoan.setCellStyle(rounding);
             } catch (NullPointerException e1) {
-                maxLoan.setCellValue("#N/A");
+                maxLoan.setCellValue("XXX");
             }
             Cell result = row.createCell(22);
             result.setCellValue(stockFinalResults.get(stock));
@@ -449,7 +477,10 @@ public class Liquidity {
         }
     }
 
-    public void calcSummary(Sheet summary){
+    /**
+     * A helper function that updates the summary sheet of the liquidity result file.
+     */
+    public void calcSummary(Sheet summary, CellStyle style, CellStyle rounding){
         int rowCount = 2;
         for (String stock : stockTotalValue.keySet()) {
             Row row = summary.createRow(rowCount);
@@ -461,29 +492,31 @@ public class Liquidity {
             marketCell.setCellValue(stockMarket.get(stock));
             Cell FS = row.createCell(3);
             FS.setCellValue(stockFsPortion.get(stock).doubleValue());
+            FS.setCellStyle(style);
             Cell MaxLtv = row.createCell(2);
             if ((Objects.equals(stockMaxLTv.get(stock), BigDecimal.valueOf(99.9)))){
                 MaxLtv.setCellValue("Fail");
             } else {
                 MaxLtv.setCellValue(stockMaxLTv.get(stock).doubleValue());
+                MaxLtv.setCellStyle(style);
             }
             Cell maxCP = row.createCell(5);
             try {
                 maxCP.setCellValue(stockMaxCP.get(stock).doubleValue());
+                maxCP.setCellStyle(rounding);
             } catch (NullPointerException e1) {
-                maxCP.setCellValue("#N/A");
+                maxCP.setCellValue("XXX");
             }
             Cell maxCPMCRatio = row.createCell(6);
             try {
-                maxCPMCRatio.setCellValue(stockMaxCPRatio.get(stock).doubleValue() * 100);
+                maxCPMCRatio.setCellValue(stockMaxCPRatio.get(stock).doubleValue());
+                maxCPMCRatio.setCellStyle(style);
             } catch (NullPointerException e1) {
-                maxCPMCRatio.setCellValue("#N/A");
+                maxCPMCRatio.setCellValue("XXX");
             }
             Cell result = row.createCell(7);
             result.setCellValue(stockFinalResults.get(stock));
             rowCount++;
         }
-//        Cell date = summary.getRow(0).getCell(1);
-//        date.setCellValue(dates.get(dates.size()-1));
     }
 }

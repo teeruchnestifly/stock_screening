@@ -24,114 +24,125 @@ public class Volatility{
      * A hashmap mapping each stock to an arrayList of the 75% LTV of each closing price for each day in the 5 years.
      */
     private final HashMap<String, ArrayList<BigDecimal>> stock75LTV = new HashMap<>();
-
     /**
      * A hashmap mapping each stock to an arrayList of the 100% LTV of each closing price for each day in the 5 years.
      */
     private final HashMap<String, ArrayList<BigDecimal>> stock100LTV = new HashMap<>();
-
     /**
      * An arraylist containing the number of trading days needed for the set simulation length for each date.
      */
     private final ArrayList<Integer> rowCount = new ArrayList<>();
-
     /**
      * A hashmap mapping each stock to an arrayList of the number of times the stock reached 75% of its LTV during the
      * simulation length, for every closing price in the 5-year period.
      */
     private final HashMap<String, ArrayList<Integer>> count75 = new HashMap<>();
-
     /**
      * A hashmap mapping each stock to an arrayList of the number of times the stock reached 100% of its LTV during the
      * simulation length, for every closing price in the 5-year period.
      */
     private final HashMap<String, ArrayList<Integer>> count100 = new HashMap<>();
-
     /**
      * A hashmap mapping each stock to an arrayList of the probability that the stock will fall to 75% of its LTV value
      * during the simulation length, for every closing price in the 5-year period.
      */
-    private final HashMap<String, ArrayList<Double>> prob75 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Double>> prob75M60 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Double>> prob75M50 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Double>> prob75M40 = new HashMap<>(); /******/
+    private final HashMap<String, ArrayList<Double>> prob75 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> prob75M60 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> prob75M50 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> prob75M40 = new HashMap<>();
     /**
      * A hashmap mapping each stock to an arrayList of the probability that the stock will fall to 100% of its LTV value
      * during the simulation length, for every closing price in the 5-year period.
      */
-    private final HashMap<String, ArrayList<Double>> prob100 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Double>> prob100M60 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Double>> prob100M50 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Double>> prob100M40 = new HashMap<>(); /******/
+    private final HashMap<String, ArrayList<Double>> prob100 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> prob100M60 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> prob100M50 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> prob100M40 = new HashMap<>();
     /**
      * A hashmap mapping each stock to an arrayList storing the number of days it took for the stock to go from 75% of
      * its LTV to 100% of its LTV during the simulation length, for every closing price in the 5-year period.
      */
-    private final HashMap<String, ArrayList<Integer>> difference75to100 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Integer>> difference75to100M60 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Integer>> difference75to100M50 = new HashMap<>(); /******/
-    private final HashMap<String, ArrayList<Integer>> difference75to100M40 = new HashMap<>(); /******/
-
+    private final HashMap<String, ArrayList<Integer>> difference75to100 = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> difference75to100M60 = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> difference75to100M50 = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> difference75to100M40 = new HashMap<>();
     /**
      * A hashmap mapping each stock to a double representing the weighted average probability of the stock reaching 75%
      * of its LTV over the course of the 5 years.
      */
-    private HashMap<String, Double> weightedAverage = new HashMap<>(); /******/
-    private HashMap<String, Double> weightedAverageM60 = new HashMap<>(); /******/
-    private HashMap<String, Double> weightedAverageM50 = new HashMap<>(); /******/
-    private HashMap<String, Double> weightedAverageM40 = new HashMap<>(); /******/
-
-    private HashMap<String, Double> normalAverage = new HashMap<>(); /******/
-    private HashMap<String, Double> normalAverageM60 = new HashMap<>(); /******/
-    private HashMap<String, Double> normalAverageM50 = new HashMap<>(); /******/
-    private HashMap<String, Double> normalAverageM40 = new HashMap<>(); /******/
-
-    private HashMap<String, ArrayList<Double>> Average = new HashMap<String, ArrayList<Double>>(); /******/
-    private HashMap<String, ArrayList<Double>> AverageM60 = new HashMap<String, ArrayList<Double>>(); /******/
-    private HashMap<String, ArrayList<Double>> AverageM50 = new HashMap<String, ArrayList<Double>>(); /******/
-    private HashMap<String, ArrayList<Double>> AverageM40 = new HashMap<String, ArrayList<Double>>(); /******/
-
-    private HashMap<String, Double> weightedAverage100 = new HashMap<>(); /******/
-    private HashMap<String, Double> weightedAverageM60p100 = new HashMap<>(); /******/
-    private HashMap<String, Double> weightedAverageM50p100 = new HashMap<>(); /******/
-    private HashMap<String, Double> weightedAverageM40p100 = new HashMap<>(); /******/
-
-    private HashMap<String, Double> normalAverage100 = new HashMap<>(); /******/
-    private HashMap<String, Double> normalAverageM60p100 = new HashMap<>(); /******/
-    private HashMap<String, Double> normalAverageM50p100 = new HashMap<>(); /******/
-    private HashMap<String, Double> normalAverageM40p100 = new HashMap<>(); /******/
-
-    private HashMap<String, ArrayList<Double>> Average100 = new HashMap<String, ArrayList<Double>>(); /******/
-    private HashMap<String, ArrayList<Double>> AverageM60p100 = new HashMap<String, ArrayList<Double>>(); /******/
-    private HashMap<String, ArrayList<Double>> AverageM50p100 = new HashMap<String, ArrayList<Double>>(); /******/
-    private HashMap<String, ArrayList<Double>> AverageM40p100 = new HashMap<String, ArrayList<Double>>(); /******/
-
-    private HashMap<String, ArrayList<Integer>> minDaysAvgM60 = new HashMap<String, ArrayList<Integer>>(); /******/
-    private HashMap<String, ArrayList<Integer>> minDaysAvgM50 = new HashMap<String, ArrayList<Integer>>(); /******/
-    private HashMap<String, ArrayList<Integer>> minDaysAvgM40 = new HashMap<String, ArrayList<Integer>>(); /******/
-
-    /** A hashmap mapping each stock to an integer representing the minimum difference in days between a closing price
-     * reaching 75% to 100% of its LTV
+    private final HashMap<String, Double> weightedAverage = new HashMap<>();
+    private final HashMap<String, Double> weightedAverageM60 = new HashMap<>();
+    private final HashMap<String, Double> weightedAverageM50 = new HashMap<>();
+    private final HashMap<String, Double> weightedAverageM40 = new HashMap<>();
+    /**
+     * A hashmap mapping each stock to a double representing the normal average probability of the stock reaching 75%
+     * of its LTV over the course of the 5 years.
      */
-    private HashMap<String, Integer> minCount3y = new HashMap<>(); /******/
-    private HashMap<String, Integer> minCount3yM60 = new HashMap<>(); /******/
-    private HashMap<String, Integer> minCount3yM50 = new HashMap<>(); /******/
-    private HashMap<String, Integer> minCount3yM40 = new HashMap<>(); /******/
-
-    private HashMap<String, Integer> minCount5yM60 = new HashMap<>(); /******/
-    private HashMap<String, Integer> minCount5yM50 = new HashMap<>(); /******/
-    private HashMap<String, Integer> minCount5yM40 = new HashMap<>(); /******/
-
+    private final HashMap<String, Double> normalAverage = new HashMap<>();
+    private final HashMap<String, Double> normalAverageM60 = new HashMap<>();
+    private final HashMap<String, Double> normalAverageM50 = new HashMap<>();
+    private final HashMap<String, Double> normalAverageM40 = new HashMap<>();
+    /**
+     * A hashmap mapping each stock to an arraylist of doubles representing the average probability of the stock
+     * reaching 75% of its LTV for each of the 20 periods in the 5 years.
+     */
+    private final HashMap<String, ArrayList<Double>> Average = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> AverageM60 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> AverageM50 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> AverageM40 = new HashMap<>();
+    /**
+     * A hashmap mapping each stock to a double representing the weighted average probability of the stock reaching 100%
+     * of its LTV over the course of the 5 years.
+     */
+    private final HashMap<String, Double> weightedAverage100 = new HashMap<>();
+    private final HashMap<String, Double> weightedAverageM60p100 = new HashMap<>();
+    private final HashMap<String, Double> weightedAverageM50p100 = new HashMap<>();
+    private final HashMap<String, Double> weightedAverageM40p100 = new HashMap<>();
+    /**
+     * A hashmap mapping each stock to a double representing the normal average probability of the stock reaching 100%
+     * of its LTV over the course of the 5 years.
+     */
+    private final HashMap<String, Double> normalAverage100 = new HashMap<>();
+    private final HashMap<String, Double> normalAverageM60p100 = new HashMap<>();
+    private final HashMap<String, Double> normalAverageM50p100 = new HashMap<>();
+    private final HashMap<String, Double> normalAverageM40p100 = new HashMap<>();
+    /**
+     * A hashmap mapping each stock to an arraylist of doubles representing the average probability of the stock
+     * reaching 100% of its LTV for each of the 20 periods in the 5 years.
+     */
+    private final HashMap<String, ArrayList<Double>> Average100 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> AverageM60p100 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> AverageM50p100 = new HashMap<>();
+    private final HashMap<String, ArrayList<Double>> AverageM40p100 = new HashMap<>();
+    /** A hashmap mapping each stock to an array list of integers representing the minimum difference in days between a
+     * closing price reaching 75% to 100% of its LTV for every period in the 5 years.
+     */
+    private final HashMap<String, ArrayList<Integer>> minDaysAvgM60 = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> minDaysAvgM50 = new HashMap<>();
+    private final HashMap<String, ArrayList<Integer>> minDaysAvgM40 = new HashMap<>();
+    /** A hashmap mapping each stock to an integer representing the minimum difference in days between a closing price
+     * reaching 75% to 100% of its LTV for the last 3 years.
+     */
+    private final HashMap<String, Integer> minCount3y = new HashMap<>();
+    private final HashMap<String, Integer> minCount3yM60 = new HashMap<>();
+    private final HashMap<String, Integer> minCount3yM50 = new HashMap<>();
+    private final HashMap<String, Integer> minCount3yM40 = new HashMap<>();
+    /** A hashmap mapping each stock to an integer representing the minimum difference in days between a closing price
+     * reaching 75% to 100% of its LTV for the last 5 years.
+     */
+    private final HashMap<String, Integer> minCount5yM60 = new HashMap<>();
+    private final HashMap<String, Integer> minCount5yM50 = new HashMap<>();
+    private final HashMap<String, Integer> minCount5yM40 = new HashMap<>();
+    /** The current ltv rating */
     private Double ltv;
-
-    private ArrayList<String> pass60 = new ArrayList<>();
-    private ArrayList<String> pass50 = new ArrayList<>();
-    private ArrayList<String> pass40 = new ArrayList<>();
-    private ArrayList<String> MAX50 = new ArrayList<>();
-    private ArrayList<String> MAX40 = new ArrayList<>();
-    private ArrayList<String> failed = new ArrayList<>();
-
-
+    /** The list of stocks that have passed each of the rounds of testing*/
+    private final ArrayList<String> pass60 = new ArrayList<>();
+    private final ArrayList<String> pass50 = new ArrayList<>();
+    private final ArrayList<String> pass40 = new ArrayList<>();
+    /** The max rating for each of the stocks */
+    private final ArrayList<String> MAX50 = new ArrayList<>();
+    private final ArrayList<String> MAX40 = new ArrayList<>();
+    private final ArrayList<String> failed = new ArrayList<>();
     /**
      * Constant for when the Excel spreadsheet has NA for the closing price.
      */
@@ -167,12 +178,11 @@ public class Volatility{
      * storing every date from the Excel file
      */
     public void dataCollection() throws IOException {
-        String excelFilePath = "Data File.xlsx";
+        String excelFilePath = "rawData.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
         Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet sheet = workbook.getSheetAt(1);
+        Sheet sheet = workbook.getSheetAt(0);
         int numColumns = sheet.getRow(0).getLastCellNum();
-
         // Loops through every column from 1 onwards, and then loops through every row in each column to populate the
         // hashmap of stocks and their closing prices
         for (int c = 1; c < numColumns; c++) {
@@ -452,7 +462,6 @@ public class Volatility{
         // The calculation of the EWMA table, used to weight the averages properly
         ArrayList<Double> EWMA = new ArrayList<>();
         EWMACalc(EWMA);
-        Collections.reverse(EWMA);
         for (String stock : stockClosingPrices.keySet()) {
             ArrayList<Double> result = calcAverages(stock, prob);
             Average.put(stock, result);
@@ -648,9 +657,9 @@ public class Volatility{
                 minDaysAvgM40.put(stock, result);
             }
             int minDays = 99999;
-            for (int i = 0; i < result.size(); i++) {
-                if(result.get(i) < minDays) {
-                    minDays = result.get(i);
+            for (Integer integer : result) {
+                if (integer < minDays) {
+                    minDays = integer;
                 }
             }
             if (ltv == 0.6){
@@ -791,36 +800,52 @@ public class Volatility{
         return volatilityPassed;
     }
 
-    public void getTemplateFile() throws IOException {
+    /**
+     * A function that will read in the volatility result template and write and output a new file.
+     *
+     * Outputs an updated file containing the data used in the volatility test.
+     *
+     * **Currently cannot run on a large number of stocks due to an out of memory error. I had to rush the code for this
+     * and it is not very efficient, could simplify by removing lots of the stored variables or switch to writing an
+     * SXSSFWorkbook instead: https://poi.apache.org/components/spreadsheet/how-to.html#xssf_sax_api may help.
+     */
+    public void writeVolatilityResult() throws IOException {
         String excelFilePath = "Result Template of Volatility Test.xlsx";
         FileInputStream inputStream = new FileInputStream(excelFilePath);
-        Workbook workbook = new XSSFWorkbook(inputStream);
+//        Workbook workbook = new XSSFWorkbook(inputStream);
+        XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
         CellStyle cellStyle = workbook.createCellStyle();
         CreationHelper createHelper = workbook.getCreationHelper();
         cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("m/d/yy"));
-            Sheet Analysis60 = workbook.getSheetAt(2);
+        CellStyle percentStyle = workbook.createCellStyle();
+        percentStyle.setDataFormat(workbook.createDataFormat().getFormat("0.000%"));
+        Sheet Analysis60 = workbook.getSheetAt(2);
             calcAnalysis(Analysis60, weightedAverageM60, AverageM60, normalAverageM60, minDaysAvgM60, minCount3yM60,
-                    minCount5yM60, weightedAverageM60p100, AverageM60p100, normalAverageM60p100);
-            Sheet Result60 = workbook.getSheetAt(5);
+                    minCount5yM60, weightedAverageM60p100, AverageM60p100, normalAverageM60p100, percentStyle);
+        Sheet Result60 = workbook.getSheetAt(5);
             calcResult(Result60, prob75M60, prob100M60, difference75to100M60, dates, cellStyle);
-            Sheet Analysis50 = workbook.getSheetAt(3);
+        Sheet Analysis50 = workbook.getSheetAt(3);
         calcAnalysis(Analysis50, weightedAverageM50, AverageM50, normalAverageM50, minDaysAvgM50, minCount3yM50,
-                minCount5yM50, weightedAverageM50p100, AverageM50p100, normalAverageM50p100);
+                minCount5yM50, weightedAverageM50p100, AverageM50p100, normalAverageM50p100, percentStyle);
         Sheet Result50 = workbook.getSheetAt(6);
         calcResult(Result50, prob75M50, prob100M50, difference75to100M50, dates, cellStyle);
         Sheet Analysis40 = workbook.getSheetAt(4);
         calcAnalysis(Analysis40, weightedAverageM40, AverageM40, normalAverageM40, minDaysAvgM40, minCount3yM40,
-                minCount5yM40, weightedAverageM40p100, AverageM40p100, normalAverageM40p100);
+                minCount5yM40, weightedAverageM40p100, AverageM40p100, normalAverageM40p100, percentStyle);
         Sheet Result40 = workbook.getSheetAt(7);
         calcResult(Result40, prob75M40, prob100M40, difference75to100M40, dates, cellStyle);
         Sheet summary = workbook.getSheetAt(0);
         calcSummary(summary);
-        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_May2023.xls");
+        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_3.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
     }
 
+
+    /**
+     * A helper function that calculates the MAX rating for all stocks and assigns them into a list.
+     */
     public void summaryHelper(){
         for (String stock : pass50) {
             if (!pass60.contains(stock)) {
@@ -832,12 +857,17 @@ public class Volatility{
                 MAX40.add(stock);
             }
         }
+        System.out.println(MAX40);
         for (String stock : stockClosingPrices.keySet()) {
             if (!MAX50.contains(stock) && !pass60.contains(stock) && !MAX40.contains(stock)) {
                 failed.add(stock);
             }
         }
     }
+
+    /**
+     * A helper function that updates the summary sheet of the volatility result file.
+     */
     public void calcSummary(Sheet summary){
         summaryHelper();
         int rowCount = 1;
@@ -909,6 +939,9 @@ public class Volatility{
         Heading5.setCellValue("Total");
     }
 
+    /**
+     * A helper function that updates the result sheets of the volatility result file.
+     */
     public void calcResult(Sheet resultSheet, HashMap<String, ArrayList<Double>> prob75,
                            HashMap<String, ArrayList<Double>> prob100,
                            HashMap<String, ArrayList<Integer>> difference75to100, ArrayList<Date> dates,
@@ -939,6 +972,8 @@ public class Volatility{
             colCount++;
         }
         colCount++;
+        Cell heading = resultSheet.getRow(0).createCell(colCount);
+        heading.setCellValue("Probability of reaching 100%LTV ");
         for (String stock : stockClosingPrices.keySet()) {
             Cell stockCell = stockRow.createCell(colCount);
             stockCell.setCellValue(stock);
@@ -953,6 +988,8 @@ public class Volatility{
             colCount++;
         }
         colCount++;
+        Cell heading2 = resultSheet.getRow(0).createCell(colCount);
+        heading2.setCellValue("(Trading) Days from 75% LTV to 100% LTV");
         for (String stock : stockClosingPrices.keySet()) {
             Cell stockCell = stockRow.createCell(colCount);
             stockCell.setCellValue(stock);
@@ -968,11 +1005,15 @@ public class Volatility{
         }
     }
 
+    /**
+     * A helper function that updates the analysis sheets of the volatility result file.
+     */
     public void calcAnalysis(Sheet analysisSheet, HashMap<String, Double> weightedAverage,
                              HashMap<String, ArrayList<Double>> Average, HashMap<String, Double> normalAverage,
                              HashMap<String, ArrayList<Integer>> minDaysAvg, HashMap<String, Integer> minCount3y,
                              HashMap<String, Integer> minCount5y, HashMap<String, Double> weightedAverage100,
-                             HashMap<String, ArrayList<Double>> Average100, HashMap<String, Double> normalAverage100){
+                             HashMap<String, ArrayList<Double>> Average100, HashMap<String, Double> normalAverage100,
+                             CellStyle percentStyle){
         int rowCount = 3;
         for (String stock : stockClosingPrices.keySet()) {
             Row row = analysisSheet.createRow(rowCount);
@@ -983,27 +1024,33 @@ public class Volatility{
             for (int i=0; i < Average.get(stock).size(); i++){
                 Cell avgVal = row.createCell(i + 2);
                 try {
-                    avgVal.setCellValue(Average.get(stock).get(i) * 100);
+                    avgVal.setCellValue(Average.get(stock).get(i));
+                    avgVal.setCellStyle(percentStyle);
                 } catch (NullPointerException e1) {
                     avgVal.setCellValue("XXX");
                 }
             }
             Cell avg = row.createCell(22);
-            avg.setCellValue(normalAverage.get(stock) * 100);
+            avg.setCellValue(normalAverage.get(stock) );
+            avg.setCellStyle(percentStyle);
             Cell EWMAavg = row.createCell(23);
-            EWMAavg.setCellValue(weightedAverage.get(stock) * 100);
+            EWMAavg.setCellValue(weightedAverage.get(stock));
+            EWMAavg.setCellStyle(percentStyle);
             for (int i=0; i < Average100.get(stock).size(); i++){
                 Cell avgVal = row.createCell(i + 24);
                 try {
-                    avgVal.setCellValue(Average100.get(stock).get(i) * 100);
+                    avgVal.setCellValue(Average100.get(stock).get(i));
+                    avgVal.setCellStyle(percentStyle);
                 } catch (NullPointerException e1) {
                     avgVal.setCellValue("XXX");
                 }
             }
             Cell avg100 = row.createCell(44);
-            avg100.setCellValue(normalAverage100.get(stock) * 100);
+            avg100.setCellValue(normalAverage100.get(stock));
+            avg100.setCellStyle(percentStyle);
             Cell EWMAavg100 = row.createCell(45);
-            EWMAavg100.setCellValue(weightedAverage100.get(stock) * 100);
+            EWMAavg100.setCellValue(weightedAverage100.get(stock));
+            EWMAavg100.setCellStyle(percentStyle);
             for (int i=0; i < minDaysAvg.get(stock).size(); i++){
                 Cell avgVal = row.createCell(i + 46);
                 try {
@@ -1033,8 +1080,8 @@ public class Volatility{
     }
 
     /**
-     * A function that will perform the first volatility check by calculating the weighted average of the probabilities
-     * of the stock reaching 75% of its LTV and comparing that value to 25%. If it is greater, the stock fails.
+     * A function that will perform the first volatility check but with 100% LTV instead of 75% in order to store the
+     * data for the volatility result Excel file.
      */
     public void calcAverages100(HashMap<String, ArrayList<Double>> prob){
         // The calculation of the EWMA table, used to weight the averages properly
