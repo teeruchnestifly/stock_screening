@@ -462,6 +462,7 @@ public class Volatility{
         // The calculation of the EWMA table, used to weight the averages properly
         ArrayList<Double> EWMA = new ArrayList<>();
         EWMACalc(EWMA);
+        Collections.reverse(EWMA);
         for (String stock : stockClosingPrices.keySet()) {
             ArrayList<Double> result = calcAverages(stock, prob);
             Average.put(stock, result);
@@ -551,14 +552,14 @@ public class Volatility{
         reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
         reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
         while (reportIndexSubmonths == -1) {
-            reportLDSubMonths = reportLDSubMonths.plusDays(1);
+            reportLDSubMonths = reportLDSubMonths.minusDays(1);
             reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
             reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
         }
-
+//        reportIndexSubmonths = reportIndexSubmonths -1;
         // Will create an arraylist storing the indexes of the dates which will make up the periods for averaging the
         // data
-        Date initialDate = dates.get(reportIndexSubmonths);
+        Date initialDate = dates.get(reportIndexSubmonths - 1);
         ArrayList<Integer> indexOfMonthPeriods = new ArrayList<>();
         indexOfMonthPeriods.add(reportIndexSubmonths);
         for (int i = 0; i < 19; i++){
@@ -714,7 +715,7 @@ public class Volatility{
             reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
             reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
         }
-        Date initialDate = dates.get(reportIndexSubmonths);
+        Date initialDate = dates.get(reportIndexSubmonths - 1);
         ArrayList<Integer> indexOfMonthPeriods = new ArrayList<>();
         indexOfMonthPeriods.add(reportIndexSubmonths);
         for (int i = 0; i < 19; i++) {
@@ -836,7 +837,7 @@ public class Volatility{
         calcResult(Result40, prob75M40, prob100M40, difference75to100M40, dates, cellStyle);
         Sheet summary = workbook.getSheetAt(0);
         calcSummary(summary);
-        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_June.xls");
+        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_June2.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
