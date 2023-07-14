@@ -216,11 +216,11 @@ public class DataClass {
             stockCell.setCellValue(stock);
             Cell NTF = row.createCell(3);
             if (resultVol60.contains(stock)) {
-                NTF.setCellValue("MAX 60");
+                NTF.setCellValue("MAX60");
             } else if ((resultVol50.contains(stock))) {
-                NTF.setCellValue("MAX 50");
+                NTF.setCellValue("MAX50");
             } else if ((resultVol40.contains(stock))) {
-                NTF.setCellValue("MAX 40");
+                NTF.setCellValue("MAX40");
             } else {
                 NTF.setCellValue("Fail");
             }
