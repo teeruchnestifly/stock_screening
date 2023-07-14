@@ -556,10 +556,21 @@ public class Volatility{
             reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
             reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
         }
+        LocalDate rld = LocalDate.ofInstant(reportDateSubMonths.toInstant(), ZoneId.systemDefault());
+        while (rld.getMonth() != reportLD.getMonth().minus(2)) {
+            rld = rld.minusDays(1);
+        }
+        reportDateSubMonths = Date.from(rld.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        while (reportIndexSubmonths == -1) {
+            reportLDSubMonths = reportLDSubMonths.minusDays(1);
+            reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        }
 //        reportIndexSubmonths = reportIndexSubmonths -1;
         // Will create an arraylist storing the indexes of the dates which will make up the periods for averaging the
         // data
-        Date initialDate = dates.get(reportIndexSubmonths - 1);
+        Date initialDate = dates.get(reportIndexSubmonths);
         ArrayList<Integer> indexOfMonthPeriods = new ArrayList<>();
         indexOfMonthPeriods.add(reportIndexSubmonths);
         for (int i = 0; i < 19; i++){
@@ -715,7 +726,18 @@ public class Volatility{
             reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
             reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
         }
-        Date initialDate = dates.get(reportIndexSubmonths - 1);
+        LocalDate rld = LocalDate.ofInstant(reportDateSubMonths.toInstant(), ZoneId.systemDefault());
+        while (rld.getMonth() != reportLD.getMonth().minus(2)) {
+            rld = rld.minusDays(1);
+        }
+        reportDateSubMonths = Date.from(rld.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        while (reportIndexSubmonths == -1) {
+            reportLDSubMonths = reportLDSubMonths.minusDays(1);
+            reportDateSubMonths = Date.from(reportLDSubMonths.atStartOfDay(ZoneId.systemDefault()).toInstant());
+            reportIndexSubmonths = dates.indexOf(reportDateSubMonths);
+        }
+        Date initialDate = dates.get(reportIndexSubmonths);
         ArrayList<Integer> indexOfMonthPeriods = new ArrayList<>();
         indexOfMonthPeriods.add(reportIndexSubmonths);
         for (int i = 0; i < 19; i++) {
@@ -837,7 +859,7 @@ public class Volatility{
         calcResult(Result40, prob75M40, prob100M40, difference75to100M40, dates, cellStyle);
         Sheet summary = workbook.getSheetAt(0);
         calcSummary(summary);
-        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_June2.xls");
+        FileOutputStream outputStream = new FileOutputStream("Volatility_Test_Result_June2023.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();

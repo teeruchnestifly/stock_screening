@@ -242,7 +242,7 @@ public class Fundamental {
         Sheet Summary = workbook.getSheetAt(0);
         helperSummary(Summary);
         inputStream.close();
-        FileOutputStream outputStream = new FileOutputStream("Fundamental_Test_Result_June.xls");
+        FileOutputStream outputStream = new FileOutputStream("Fundamental_Test_Result_June2023.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();

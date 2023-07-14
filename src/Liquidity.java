@@ -402,7 +402,7 @@ public class Liquidity {
         Sheet summary = workbook.getSheetAt(0);
         calcSummary(summary, style, rounding);
         inputStream.close();
-        FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result_June.xls");
+        FileOutputStream outputStream = new FileOutputStream("Liquidity_Test_Result_June2023.xls");
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
